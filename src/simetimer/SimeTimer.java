@@ -10,7 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,22 +25,29 @@ public class SimeTimer extends JFrame {
 
 	private static final long serialVersionUID = -6143989045338224554L;
 
+	// window constants
 	/**
 	 * the width of the {@link JFrame}, corrected (+6)
 	 */
-	private static final int FRAME_WIDTH = 250 + 6;
+	private static final int FRAME_WIDTH = 310 + 6;
 	/**
 	 * the height of the {@link JFrame}, corrected (+28)
 	 */
-	private static final int FRAME_HEIGHT = 100 + 28;
+	private static final int FRAME_HEIGHT = 95 + 28;
+	
+	// default preferences
 	/**
 	 * the default x position of the {@link JFrame} on screen
 	 */
-	private static final int DEFAULT_X_POSITION = (int) ((3./4.) * Toolkit.getDefaultToolkit().getScreenSize().width);
+	static final int DEFAULT_X_POSITION = (int) ((3./4.) * Toolkit.getDefaultToolkit().getScreenSize().width);
 	/**
 	 * the default y position of the {@link JFrame} on screen
 	 */
-	private static final int DEFAULT_Y_POSITION = (int) ((1./3.) * Toolkit.getDefaultToolkit().getScreenSize().height);
+	static final int DEFAULT_Y_POSITION = (int) ((1./3.) * Toolkit.getDefaultToolkit().getScreenSize().height);
+	/**
+	 * the default file path for the {@link JFileChooser}
+	 */
+	static final String DEFAULT_PATH = null;
 	
 	
 	// frame elements
@@ -76,7 +82,7 @@ public class SimeTimer extends JFrame {
 		
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
-		loadPreferences();
+		saveManager.loadAndSetPreferences();
 		setResizable(false);
 		Container cp = getContentPane();
 		cp.setLayout(null);
@@ -84,33 +90,32 @@ public class SimeTimer extends JFrame {
 		
 		// setting layout
 		
-		timerLabel.setBounds(10, 10, 140, 40);
+		timerLabel.setBounds(10, 10, 200, 40);
 		timerLabel.setText("0:00:00.000");
-		timerLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		timerLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
-		timerLabel.setFont(new Font("Dialog", Font.PLAIN, 24));
+		timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		timerLabel.setFont(new Font("Dialog", Font.PLAIN, 30));
 		timerLabel.setEnabled(true);
 		cp.add(timerLabel);
 		
-		startStopButton.setBounds(160, 10, 80, 40);
+		startStopButton.setBounds(220, 10, 80, 40);
 		startStopButton.setText("Start");
 		startStopButton.setFont(new Font("Dialog", Font.PLAIN, 20));
 		startStopButton.setEnabled(true);
 		cp.add(startStopButton);
 		
-		saveButton.setBounds(10, 60, 65, 30);
-		saveButton.setText("save");
+		saveButton.setBounds(10, 60, 95, 25);
+		saveButton.setText("save time");
 		saveButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		saveButton.setEnabled(true);
 		cp.add(saveButton);
 		
-		loadButton.setBounds(85, 60, 65, 30);
-		loadButton.setText("load");
+		loadButton.setBounds(115, 60, 95, 25);
+		loadButton.setText("load time");
 		loadButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		loadButton.setEnabled(true);
 		cp.add(loadButton);
 		
-		resetButton.setBounds(160, 60, 80, 30);
+		resetButton.setBounds(220, 60, 80, 25);
 		resetButton.setText("reset");
 		resetButton.setFont(new Font("Dialog", Font.PLAIN, 16));
 		resetButton.setBackground(new Color(255, 200, 200));
@@ -238,9 +243,7 @@ public class SimeTimer extends JFrame {
 		int minutes = (int) (time % 60);
 		time -= minutes;
 		time /= 60;
-		int hours = (int) (time % 24);
-		time -= hours;
-		time /= 24;
+		int hours = (int) time;
 		StringBuilder result = new StringBuilder();
 		result.append(hours)
 					.append(":")
@@ -321,45 +324,31 @@ public class SimeTimer extends JFrame {
 	
 	// PREFERENCES
 	/**
-	 * saves user preferences into saveManager
+	 * feeds preference data into saveManager to be saved there
 	 */
 	private void savePreferences() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getLocationOnScreen().x)
-			.append(System.lineSeparator())
-			.append(getLocationOnScreen().y)
-			.append(System.lineSeparator())
-			.append(usedPath)
-			.append(System.lineSeparator());
-		try {
-			saveManager.savePreferences(sb.toString());
-		} catch (IOException e) {
-			System.err.println("Preferences saving failed.");
-		}
+		saveManager.savePreferences(getLocationOnScreen().x,
+																getLocationOnScreen().y,
+																usedPath);
 	}
 	
 	/**
-	 * loads user preferences from saveManager
+	 * this method is called by the {@link SaveManager} to feed back
+	 * the loaded preferences
+	 * @param xPosition last saved x position of the {@link JFrame}
+	 * @param yPosition last saved y position of the {@link JFrame}
+	 * @param usedPath last saved save/load path
 	 */
-	private void loadPreferences() {
-		String[] prefs;
-		try {
-			prefs = saveManager.loadPreferences();
-			int xPosition = (int) Double.parseDouble(prefs[0]);
-			int yPosition = (int) Double.parseDouble(prefs[1]);
-			setLocation(xPosition, yPosition);
-			usedPath = prefs[2].equals("null") ? null : prefs[2];
-		} catch (IOException | NumberFormatException e) {
-			// preferences file doesn't exist or couldn't be read
-			System.err.println("Preferences loading failed.");
-			setLocation(DEFAULT_X_POSITION, DEFAULT_Y_POSITION);
-			return;
-		}
+	void setPreferences(int xPosition,
+											int yPosition,
+											String usedPath) {
+		setLocation(xPosition, yPosition);
+		this.usedPath = usedPath;
 	}
 	
 	
 	
-	
+	// MAIN
 	/**
 	 * main method. Starts the application
 	 * @param args not used

@@ -1,6 +1,5 @@
 package simetimer;
 
-import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,15 +7,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public class SaveManager {
 	
-	private File preferences;
-	private Component owner;
+	private File preferencesFile;
+	private SimeTimer owner;
 
-	public SaveManager(Component owner) {
-		preferences = new File("SimeTimer.options");
+	public SaveManager(SimeTimer owner) {
+		preferencesFile = new File("SimeTimer.options");
 		this.owner = owner;
 	}
 	
@@ -25,7 +26,8 @@ public class SaveManager {
 	// MAIN METHODS
 	
 	/**
-	 * saves the given String into the given File and handles errors
+	 * saves the given String into the given File and handles errors.
+	 * Handles Exceptions.
 	 * @param data the String to save into the given File
 	 * @param saveFile the File to save the given String into
 	 */
@@ -46,7 +48,8 @@ public class SaveManager {
 	
 	/**
 	 * loads the first line from the given File, parses it to a long
-	 * and returns it, handles errors
+	 * and returns it.
+	 * Handles Exceptions.
 	 * @param saveFile the File to load from
 	 * @return a long parsed from the File's first line or -1L on errors
 	 */
@@ -107,32 +110,69 @@ public class SaveManager {
 	// PREFERENCES
 	
 	/**
-	 * saves the given String into the default preferences file
-	 * @param data the String to save in the preferences file
-	 * 						 divided by {@link System.lineSeparator()}
-	 * @throws IOException on unknown I/O errors
+	 * saves the given data into the default preferences file.
+	 * Handles Exceptions.
+	 * @param xPosition last x position of the {@link JFrame}
+	 * @param yPosition last y position of the {@link JFrame}
+	 * @param usedPath last used save/load path
 	 */
-	void savePreferences(String data) throws IOException {
+	void savePreferences(int xPosition,
+											 int yPosition,
+											 String usedPath) {
+		// compile data
+		StringBuilder data = new StringBuilder();
+		data.append(xPosition)
+				.append(System.lineSeparator())
+				.append(yPosition)
+				.append(System.lineSeparator())
+				.append(usedPath)
+				.append(System.lineSeparator());
+		// write into file
 		BufferedWriter output;
-		output = new BufferedWriter(new FileWriter(preferences));
-		output.write(data);
-		output.close();
+		try {
+			output = new BufferedWriter(new FileWriter(preferencesFile));
+			output.write(data.toString());
+			output.close();
+		} catch (IOException e) {
+			// unknown error
+			System.err.println("Preferences saving failed.");
+		}
 	}
 	
 	/**
-	 * loads a set of Strings from the default preferences file
-	 * and returns it in an array
-	 * @return a String array containing the lines of the default preferences file 
-	 * @throws FileNotFoundException when the preferences file could not be found
-	 * @throws IOException on unknown I/O errors
+	 * loads preferenecs from the default preferences file
+	 * and feeds them back to the {@link SimeTimer} using the
+	 * setPreferences() method.
+	 * Handles Exceptions.
 	 */
-	String[] loadPreferences() throws FileNotFoundException, IOException {
-		String[] result;
+	void loadAndSetPreferences() {
+		int xPosition = SimeTimer.DEFAULT_X_POSITION;
+		int yPosition = SimeTimer.DEFAULT_Y_POSITION;
+		String usedPath = SimeTimer.DEFAULT_PATH;
+		String[] lines;
 		BufferedReader input;
-		input = new BufferedReader(new FileReader(preferences));
-		result = input.lines().toArray(i -> new String[i]);
-		input.close();
-		return result;
+		try {
+			input = new BufferedReader(new FileReader(preferencesFile));
+			// read lines
+			lines = input.lines().toArray(i -> new String[i]);
+			// retrieve preferences
+			xPosition = (int) Double.parseDouble(lines[0]);
+			yPosition = (int) Double.parseDouble(lines[1]);
+			usedPath = lines[2].equals("null") ? null : lines[2];
+			// lastly
+			input.close();
+		} catch (FileNotFoundException e) {
+			// preferences file couldn't be found
+			System.err.println("Preferences loading failed: File not found.");
+		} catch (NumberFormatException e) {
+			// file corrupted
+			System.err.println("Preferences loading failed: File corrupted.");
+		} catch (IOException e) {
+			// unknown error
+			System.err.println("Failed to close preferences file.");
+		}
+		// feed back preferences
+		owner.setPreferences(xPosition, yPosition, usedPath);
 	}
 
 }
