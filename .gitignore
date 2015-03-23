@@ -1,0 +1,14 @@
+# Compiled class file
+*.class
+
+# JAR files
+*.jar
+
+# Log file
+*.log
+
+# Backup files
+*.bak
+
+# SimeTimer options file
+*.options
