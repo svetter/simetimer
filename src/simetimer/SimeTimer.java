@@ -184,26 +184,28 @@ public class SimeTimer extends JFrame {
 		// save preferences on close
 		addWindowListener(new WindowListener() {
 			@Override
-			public void windowActivated(WindowEvent arg0) {}
+			public void windowActivated(WindowEvent evt) {}
 			@Override
-			public void windowClosed(WindowEvent arg0) {}
+			public void windowClosed(WindowEvent evt) {}
 			@Override
-			public void windowClosing(WindowEvent arg0) {
+			public void windowClosing(WindowEvent evt) {
 				savePreferences();
 			}
 			@Override
-			public void windowDeactivated(WindowEvent arg0) {}
+			public void windowDeactivated(WindowEvent evt) {}
 			@Override
-			public void windowDeiconified(WindowEvent arg0) {}
+			public void windowDeiconified(WindowEvent evt) {}
 			@Override
-			public void windowIconified(WindowEvent arg0) {}
+			public void windowIconified(WindowEvent evt) {}
 			@Override
-			public void windowOpened(WindowEvent arg0) {}
+			public void windowOpened(WindowEvent evt) {}
 		});
+		
 		
 		
 		// frame ready
 		setVisible(true);
+		
 	}
 	
 	
@@ -294,6 +296,9 @@ public class SimeTimer extends JFrame {
 		}
 	}
 	
+	
+	// SAVE / LOAD
+	
 	/**
 	 * saves the measured time at the moment of mathod call into the saveManager
 	 */
@@ -323,6 +328,7 @@ public class SimeTimer extends JFrame {
 	
 	
 	// PREFERENCES
+	
 	/**
 	 * feeds preference data into saveManager to be saved there
 	 */
@@ -365,7 +371,7 @@ public class SimeTimer extends JFrame {
 	 * @author Simon Vetter
 	 *
 	 */
-	abstract class SaveLoadAction extends AbstractAction {
+	private abstract class SaveLoadAction extends AbstractAction {
 		private static final long serialVersionUID = -5391589383905897304L;
 		private JFrame owner;
 		private JFileChooser fileChooser;

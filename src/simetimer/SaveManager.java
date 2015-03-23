@@ -2,22 +2,36 @@ package simetimer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+
 public class SaveManager {
+	
+	/**
+	 * default path for the preferences file
+	 */
+	public static final String PREFERENCES_PATH = "SimeTimer.options";
 	
 	private File preferencesFile;
 	private SimeTimer owner;
 
+	/**
+	 * constructor. Initializes preferences {@link File}
+	 * and stores owner {@link JFrame}
+	 * @param owner the parent {@link JFrame} for save/load dialogs
+	 */
 	public SaveManager(SimeTimer owner) {
-		preferencesFile = new File("SimeTimer.options");
+		preferencesFile = new File(PREFERENCES_PATH);
 		this.owner = owner;
 	}
 	
@@ -103,6 +117,62 @@ public class SaveManager {
 		}
 		// no Exceptions
 		return data;
+	}
+	
+	
+	
+	// CHUNKS
+	
+	void saveProjectToFile(SimeTimerProject project, String savePath) {
+		try {
+			DataOutputStream output = new DataOutputStream(new FileOutputStream(savePath));
+			// for every TimeChunk:
+			for (int i=0; i<project.getNumberOfTimeChunks(); i++) {
+				// write startDate as long
+				output.writeLong(project.getTimeChunk(i).getStartDate().getTime());
+				// write stoppedTime
+				output.writeLong(project.getTimeChunk(i).getStoppedTime());
+			}
+			output.close();
+		} catch (FileNotFoundException e) {
+			// save file not found
+			JOptionPane.showMessageDialog(owner,
+																		"The save file could not be found.",
+																		"Save Error",
+																		JOptionPane.ERROR_MESSAGE);
+		} catch (IOException e) {
+			// unknown error
+			JOptionPane.showMessageDialog(owner,
+																		"An unknown error has occured while saving.",
+																		"Save Error",
+																		JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	SimeTimerProject loadProjectFromFile(String loadPath) {
+		SimeTimerProject result = new SimeTimerProject();
+		try {
+			DataInputStream input = new DataInputStream(new FileInputStream(loadPath));
+			while (input.available() > Long.BYTES) {
+				result.addTimeChunk(new TimeChunk(input.readLong(),
+																					input.readLong()));
+			}
+			input.close();
+		} catch (FileNotFoundException e) {
+			// load file not found
+			JOptionPane.showMessageDialog(owner,
+																		"The load file could not be found.",
+																		"Load Error",
+																		JOptionPane.ERROR_MESSAGE);
+		} catch (IOException e) {
+			// unknown error
+			JOptionPane.showMessageDialog(owner,
+																		"An unknown error has occured while loading.",
+																		"Load Error",
+																		JOptionPane.ERROR_MESSAGE);
+		}
+		// TODO R�ckgabe bei Fehlern?
+		return result;
 	}
 	
 	
