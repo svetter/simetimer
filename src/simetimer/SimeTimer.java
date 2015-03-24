@@ -15,6 +15,7 @@ import java.util.TimerTask;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * a slick stopwatch
@@ -27,17 +28,28 @@ public class SimeTimer extends JFrame {
 
 	// window constants
 	/**
+	 * determines how many rows the {@link JTable} can show at once
+	 */
+	public static final int TABLE_ROWS = 10;
+	/**
 	 * the width of the {@link JFrame}, corrected (+6)
 	 */
 	public static final int FRAME_WIDTH = 310 + 6;
 	/**
 	 * the height of the {@link JFrame}, corrected (+28)
 	 */
-	public static final int FRAME_HEIGHT = 95 + 28;
+	public static final int FRAME_HEIGHT = 95 + 37 + TABLE_ROWS * 16 + 28;
+	/**
+	 * the system's main screen width, set at runtime
+	 */
 	public static final int SCREEN_WIDTH = Toolkit.getDefaultToolkit().getScreenSize().width;
+	/**
+	 * the system's main screen height, set at runtime
+	 */
 	public static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
-	// default preferences
 	
+	
+	// default preferences
 	/**
 	 * the default x position of the {@link JFrame} on screen
 	 */
@@ -49,7 +61,8 @@ public class SimeTimer extends JFrame {
 	/**
 	 * the default file path for the {@link JFileChooser}
 	 */
-	static final String DEFAULT_PATH = null;
+	public static final String DEFAULT_PATH = null;
+	
 	
 	
 	// frame elements
@@ -59,6 +72,10 @@ public class SimeTimer extends JFrame {
 	private JButton loadButton = new JButton();
 	private JButton resetButton = new JButton();
 	
+	private JTable table = new JTable(0, 2);
+	private DefaultTableModel tableModel;
+	private JScrollPane tableScrollPane = new JScrollPane(table);
+	
 	// logic variables
 	private long accumulatedTime;
 	private long currentStartTime;
@@ -67,7 +84,9 @@ public class SimeTimer extends JFrame {
 	private TimerTask displayTask;
 	private Timer displayTimer;
 	
-	private SaveManager saveManager = new SaveManager(this);
+	// project and saving
+	private SimeTimerProject project;
+	private SaveManager saveManager;
 	/**
 	 * last used path to save or load.
 	 * Can be null!
@@ -81,7 +100,10 @@ public class SimeTimer extends JFrame {
 	 */
 	public SimeTimer() {
 		super("SimeTimer");
+		
 		accumulatedTime = 0L;
+		project = new SimeTimerProject();
+		saveManager = new SaveManager(this);
 		
 		
 		// initializing frame
@@ -100,7 +122,6 @@ public class SimeTimer extends JFrame {
 		timerLabel.setText("0:00:00.000");
 		timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		timerLabel.setFont(new Font("Dialog", Font.PLAIN, 30));
-		timerLabel.setEnabled(true);
 		cp.add(timerLabel);
 		
 		startStopButton.setBounds(220, 10, 80, 40);
@@ -110,23 +131,45 @@ public class SimeTimer extends JFrame {
 		cp.add(startStopButton);
 		
 		saveButton.setBounds(10, 60, 95, 25);
-		saveButton.setText("save time");
+		saveButton.setText("save times");
 		saveButton.setFont(new Font("Dialog", Font.PLAIN, 14));
-		saveButton.setEnabled(true);
 		cp.add(saveButton);
 		
 		loadButton.setBounds(115, 60, 95, 25);
-		loadButton.setText("load time");
+		loadButton.setText("load times");
 		loadButton.setFont(new Font("Dialog", Font.PLAIN, 14));
-		loadButton.setEnabled(true);
 		cp.add(loadButton);
 		
 		resetButton.setBounds(220, 60, 80, 25);
 		resetButton.setText("reset");
 		resetButton.setFont(new Font("Dialog", Font.PLAIN, 16));
 		resetButton.setBackground(new Color(255, 200, 200));
-		resetButton.setEnabled(true);
 		cp.add(resetButton);
+		
+		
+		tableScrollPane.setBounds(10, 100, 291, 23 + TABLE_ROWS * 16);
+		tableModel = new DefaultTableModel() {
+			private static final long serialVersionUID = 4218091309598726974L;
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		table.setModel(tableModel);
+		table.setFillsViewportHeight(true);
+		table.setCellSelectionEnabled(true);
+		table.setColumnSelectionAllowed(true);
+		table.setRowSelectionAllowed(true);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+		table.setDragEnabled(false);
+		tableScrollPane.setAutoscrolls(true);
+		tableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		tableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		// set table colums
+		tableModel.addColumn("Date");
+		tableModel.addColumn("Time");
+		cp.add(tableScrollPane);
+		
 		
 		
 		// button functionalities
@@ -139,12 +182,16 @@ public class SimeTimer extends JFrame {
 					currentStartTime = System.currentTimeMillis();
 					startStopButton.setText("Stop");
 					enableDisplayTimer(true);
+					// TODO: Save date
+					// TODO: List entry? or second label
 				} else {
 					// button OFF - STOP the timer
 					accumulatedTime += System.currentTimeMillis() - currentStartTime;
 					startStopButton.setText("Start");
 					enableDisplayTimer(false);
 					displayCurrentTime();
+					// TODO: Save time to project
+					// TODO: Refresh list
 				}
 			}
 		});
@@ -157,6 +204,7 @@ public class SimeTimer extends JFrame {
 		});
 		
 		SaveLoadAction saveButtonAction = new SaveLoadAction(this) {
+			// TODO: Save project instead of single time
 			private static final long serialVersionUID = 7117119994405070822L;
 			@Override
 			void call(JFileChooser fileChooser, JFrame owner) {
@@ -172,6 +220,7 @@ public class SimeTimer extends JFrame {
 		saveButton.addActionListener(saveButtonAction);
 		
 		SaveLoadAction loadButtonAction = new SaveLoadAction(this) {
+			// TODO: Load project instead of single time
 			private static final long serialVersionUID = 7117119994405070822L;
 			@Override
 			void call(JFileChooser fileChooser, JFrame owner) {
@@ -196,6 +245,7 @@ public class SimeTimer extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent evt) {
 				savePreferences();
+				// TODO: Prompt about saving
 			}
 			@Override
 			public void windowDeactivated(WindowEvent evt) {}
@@ -211,6 +261,9 @@ public class SimeTimer extends JFrame {
 		
 		// frame ready
 		setVisible(true);
+		
+		
+		// TODO: open previous project by default
 		
 	}
 	
@@ -228,6 +281,7 @@ public class SimeTimer extends JFrame {
 	 * resets the timer
 	 */
 	private void reset() {
+		// TODO: reset whole project
 		accumulatedTime = 0L;
 		if (running()) {
 			currentStartTime = System.currentTimeMillis();
@@ -237,11 +291,19 @@ public class SimeTimer extends JFrame {
 	}
 	
 	/**
+	 * scrolls the {@link JTable} all the way down
+	 */
+	private void scrollDown() {
+		tableScrollPane.getVerticalScrollBar().setValue(
+				tableScrollPane.getVerticalScrollBar().getMaximum());
+	}
+	
+	/**
 	 * generates a String for the timerLabel from a given time in milliseconds
 	 * @param time the stopped time to be displayed, in milliseconds
 	 * @return a {@link String} representing the stopped time in a readable format
 	 */
-	private String timeToString(long time) {
+	public static String timeToString(long time) {
 		int millis = (int) (time % 1000);
 		time -= millis;
 		time /= 1000;
@@ -276,6 +338,7 @@ public class SimeTimer extends JFrame {
 			result = timeToString(accumulatedTime);
 		}
 		timerLabel.setText(result);
+		// TODO: refresh second label
 	}
 	
 	/**
