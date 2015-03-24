@@ -29,21 +29,23 @@ public class SimeTimer extends JFrame {
 	/**
 	 * the width of the {@link JFrame}, corrected (+6)
 	 */
-	private static final int FRAME_WIDTH = 310 + 6;
+	public static final int FRAME_WIDTH = 310 + 6;
 	/**
 	 * the height of the {@link JFrame}, corrected (+28)
 	 */
-	private static final int FRAME_HEIGHT = 95 + 28;
-	
+	public static final int FRAME_HEIGHT = 95 + 28;
+	public static final int SCREEN_WIDTH = Toolkit.getDefaultToolkit().getScreenSize().width;
+	public static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
 	// default preferences
+	
 	/**
 	 * the default x position of the {@link JFrame} on screen
 	 */
-	static final int DEFAULT_X_POSITION = (int) ((3./4.) * Toolkit.getDefaultToolkit().getScreenSize().width);
+	public static final int DEFAULT_X_POSITION = (int) ((3./4.) * SCREEN_WIDTH);
 	/**
 	 * the default y position of the {@link JFrame} on screen
 	 */
-	static final int DEFAULT_Y_POSITION = (int) ((1./3.) * Toolkit.getDefaultToolkit().getScreenSize().height);
+	public static final int DEFAULT_Y_POSITION = (int) ((1./3.) * SCREEN_HEIGHT);
 	/**
 	 * the default file path for the {@link JFileChooser}
 	 */
@@ -66,6 +68,10 @@ public class SimeTimer extends JFrame {
 	private Timer displayTimer;
 	
 	private SaveManager saveManager = new SaveManager(this);
+	/**
+	 * last used path to save or load.
+	 * Can be null!
+	 */
 	private String usedPath;
 	
 	
@@ -201,7 +207,7 @@ public class SimeTimer extends JFrame {
 			public void windowOpened(WindowEvent evt) {}
 		});
 		
-		
+
 		
 		// frame ready
 		setVisible(true);

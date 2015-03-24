@@ -22,7 +22,7 @@ public class TimeChunk {
 	 * @param stoppedTime the total length of the TimeChunk, in milliseconds
 	 * @param startDate a {@link Date} instance from the start of the measurement
 	 */
-	TimeChunk(long stoppedTime, Date startDate) {
+	public TimeChunk(long stoppedTime, Date startDate) {
 		this.stoppedTime = stoppedTime;
 		this.startDate = startDate;
 	}
@@ -31,7 +31,7 @@ public class TimeChunk {
 	 * @param startDateMillis the start date represented in milliseconds
 	 * @param stoppedTime the total length of the TimeChunk, in milliseconds
 	 */
-	TimeChunk(long startDateMillis, long stoppedTime) {
+	public TimeChunk(long startDateMillis, long stoppedTime) {
 		this(stoppedTime, new Date(startDateMillis));
 	}
 	
@@ -40,7 +40,7 @@ public class TimeChunk {
 	 * get the total length of the TimeChunk
 	 * @return the total length of the TimeChunk, in milliseconds
 	 */
-	long getStoppedTime() {
+	public long getStoppedTime() {
 		return stoppedTime;
 	}
 	
@@ -48,7 +48,7 @@ public class TimeChunk {
 	 * get the {@link Date} instance from the start of the measurement
 	 * @return the {@link Date} instance from the start of the measurement
 	 */
-	Date getStartDate() {
+	public Date getStartDate() {
 		return startDate;
 	}
 	
@@ -56,11 +56,11 @@ public class TimeChunk {
 	 * get the {@link Date} instance from the end of the measurement
 	 * @return the {@link Date} instance from the end of the measurement
 	 */
-	Date getEndDate() {
+	public Date getEndDate() {
 		return new Date(startDate.getTime() + stoppedTime);
 	}
 	
-	int compareTo(TimeChunk otherTimeChunk) {
+	public int compareTo(TimeChunk otherTimeChunk) {
 		if (this.startDate.before(otherTimeChunk.startDate)) {
 			return -1;
 		} else if (this.startDate.after(otherTimeChunk.startDate)) {
