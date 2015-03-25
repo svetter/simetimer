@@ -1,19 +1,22 @@
 package simetimer;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+/**
+ * models a project in the SimeTimer application
+ * @author Simon Vetter
+ *
+ */
 public class SimeTimerProject {
 	
 	private List<TimeChunk> timeChunks;
 
 	public SimeTimerProject() {
 		timeChunks = new ArrayList<TimeChunk>(10);
-		new TimeChunk(1L, new Date());
 	}
 	
-	public TimeChunk getTimeChunk(int index) {
+	public TimeChunk getTimeChunkAt(int index) {
 		sortTimes();
 		return timeChunks.get(index);
 	}
@@ -22,8 +25,24 @@ public class SimeTimerProject {
 		timeChunks.add(timeChunk);
 	}
 	
-	public int getNumberOfTimeChunks() {
+	public int size() {
 		return timeChunks.size();
+	}
+	
+	public long getProjectTime() {
+		long result = 0L;
+		for (TimeChunk timeChunk : timeChunks) {
+			result += timeChunk.getStoppedTime();
+		}
+		return result;
+	}
+	
+	public long getLastChunkTime() {
+		try {
+			return timeChunks.get(size()-1).getStoppedTime();
+		} catch (IndexOutOfBoundsException e) {
+			return 0L;
+		}
 	}
 	
 	public void sortTimes() {

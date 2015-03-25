@@ -15,7 +15,9 @@ import java.util.TimerTask;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 /**
  * a slick stopwatch
@@ -23,22 +25,68 @@ import javax.swing.table.DefaultTableModel;
  *
  */
 public class SimeTimer extends JFrame {
-
+	
+	
 	private static final long serialVersionUID = -6143989045338224554L;
-
-	// window constants
+	
+	
+	// LAYOUT CONSTANTS
 	/**
 	 * determines how many rows the {@link JTable} can show at once
 	 */
 	public static final int TABLE_ROWS = 10;
+	
+	private static final int DEFAULT_GAP = 10,
+													 SMALL_GAP = 5,
+													 BIG_GAP = 15;
+	private static final int FIRST_ITEM_ROW_SIZE = 40,
+													 SECOND_ITEM_ROW_SIZE = 25,
+													 THIRD_ITEM_ROW_SIZE = 25,
+													 FOURTH_ITEM_ROW_SIZE = TABLE_ROWS * 16 + 22;
+	private static final int FIRST_ITEM_COLUMN_SIZE = 95,
+													 SECOND_ITEM_COLUMN_SIZE = 95,
+													 THIRD_ITEM_COLUMN_SIZE = 80,
+													 DOUBLE_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE +
+													 														DEFAULT_GAP +
+													 														SECOND_ITEM_COLUMN_SIZE,
+													 FULL_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE +
+													 													DEFAULT_GAP +
+													 													SECOND_ITEM_COLUMN_SIZE +
+													 													DEFAULT_GAP +
+													 													THIRD_ITEM_COLUMN_SIZE;
+	private static final int FIRST_ITEM_ROW_OFFSET = DEFAULT_GAP,
+													 SECOND_ITEM_ROW_OFFSET = FIRST_ITEM_ROW_OFFSET +
+													 													FIRST_ITEM_ROW_SIZE +
+													 													SMALL_GAP,
+													 THIRD_ITEM_ROW_OFFSET = SECOND_ITEM_ROW_OFFSET +
+													 												 SECOND_ITEM_ROW_SIZE +
+													 												 DEFAULT_GAP,
+													 FOURTH_ITEM_ROW_OFFSET = THIRD_ITEM_ROW_OFFSET +
+													 													THIRD_ITEM_ROW_SIZE +
+													 													BIG_GAP;
+	private static final int FIRST_ITEM_COLUMN_OFFSET = DEFAULT_GAP,
+													 SECOND_ITEM_COLUMN_OFFSET = FIRST_ITEM_COLUMN_OFFSET +
+													 														 FIRST_ITEM_COLUMN_SIZE +
+													 														 DEFAULT_GAP,
+													 THIRD_ITEM_COLUMN_OFFSET = SECOND_ITEM_COLUMN_OFFSET +
+													 														SECOND_ITEM_COLUMN_SIZE +
+													 														DEFAULT_GAP;
+	
+	//window constants
 	/**
 	 * the width of the {@link JFrame}, corrected (+6)
 	 */
-	public static final int FRAME_WIDTH = 310 + 6;
+	public static final int FRAME_WIDTH = FIRST_ITEM_COLUMN_OFFSET +
+																				FULL_WIDTH_COLUMN_SIZE +
+																				DEFAULT_GAP +
+																				6;
 	/**
 	 * the height of the {@link JFrame}, corrected (+28)
 	 */
-	public static final int FRAME_HEIGHT = 95 + 37 + TABLE_ROWS * 16 + 28;
+	public static final int FRAME_HEIGHT = FOURTH_ITEM_ROW_OFFSET +
+																				 FOURTH_ITEM_ROW_SIZE +
+																				 DEFAULT_GAP +
+																				 28;
 	/**
 	 * the system's main screen width, set at runtime
 	 */
@@ -47,6 +95,25 @@ public class SimeTimer extends JFrame {
 	 * the system's main screen height, set at runtime
 	 */
 	public static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
+													 
+	
+	
+	// app behaviour
+	/**
+	 * determines whether the SimeTimer asks the user if he wants to save
+	 * when they attempt to close an unsaved project
+	 */
+	private static final boolean ASK_FOR_SAVE_ON_CLOSE = false;
+	/**
+	 * determines whether the SimeTimer asks the user if he wants to save
+	 * when they attempt to load a project while having another unsaved one open
+	 */
+	private static final boolean ASK_FOR_SAVE_ON_LOAD = true;
+	/**
+	 * determines whether the SimeTimer asks the user if he wants to load
+	 * the last used project when the app is started
+	 */
+	private static final boolean ASK_FOR_LOAD_ON_STARTUP = false;
 	
 	
 	// default preferences
@@ -66,19 +133,21 @@ public class SimeTimer extends JFrame {
 	
 	
 	// frame elements
-	private JLabel timerLabel = new JLabel();
+	private JLabel totalTimeLabel = new JLabel();
+	private JLabel chunkTimeLabel = new JLabel();
 	private JToggleButton startStopButton = new JToggleButton();
+	private JButton cutButton = new JButton();
 	private JButton saveButton = new JButton();
 	private JButton loadButton = new JButton();
 	private JButton resetButton = new JButton();
 	
-	private JTable table = new JTable(0, 2);
+	private JTable table = new JTable(0, 3);
 	private DefaultTableModel tableModel;
 	private JScrollPane tableScrollPane = new JScrollPane(table);
 	
 	// logic variables
-	private long accumulatedTime;
 	private long currentStartTime;
+	private long lastProjectTime;
 	
 	// objects for timed task
 	private TimerTask displayTask;
@@ -101,7 +170,6 @@ public class SimeTimer extends JFrame {
 	public SimeTimer() {
 		super("SimeTimer");
 		
-		accumulatedTime = 0L;
 		project = new SimeTimerProject();
 		saveManager = new SaveManager(this);
 		
@@ -118,56 +186,77 @@ public class SimeTimer extends JFrame {
 		
 		// setting layout
 		
-		timerLabel.setBounds(10, 10, 200, 40);
-		timerLabel.setText("0:00:00.000");
-		timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		timerLabel.setFont(new Font("Dialog", Font.PLAIN, 30));
-		cp.add(timerLabel);
+		totalTimeLabel.setBounds(FIRST_ITEM_COLUMN_OFFSET,
+												FIRST_ITEM_ROW_OFFSET,
+												DOUBLE_WIDTH_COLUMN_SIZE,
+												FIRST_ITEM_ROW_SIZE);
+		totalTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		totalTimeLabel.setFont(new Font("Dialog", Font.PLAIN, 30));
+		cp.add(totalTimeLabel);
 		
-		startStopButton.setBounds(220, 10, 80, 40);
+		chunkTimeLabel.setBounds(FIRST_ITEM_COLUMN_OFFSET,
+														 SECOND_ITEM_ROW_OFFSET,
+														 DOUBLE_WIDTH_COLUMN_SIZE,
+														 SECOND_ITEM_ROW_SIZE);
+		chunkTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		chunkTimeLabel.setFont(new Font("Dialog", Font.PLAIN, 24));
+		cp.add(chunkTimeLabel);
+		
+		startStopButton.setBounds(THIRD_ITEM_COLUMN_OFFSET,
+															FIRST_ITEM_ROW_OFFSET,
+															THIRD_ITEM_COLUMN_SIZE,
+															FIRST_ITEM_ROW_SIZE);
 		startStopButton.setText("Start");
-		startStopButton.setFont(new Font("Dialog", Font.PLAIN, 20));
-		startStopButton.setEnabled(true);
+		startStopButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		cp.add(startStopButton);
 		
-		saveButton.setBounds(10, 60, 95, 25);
-		saveButton.setText("save times");
+		cutButton.setBounds(THIRD_ITEM_COLUMN_OFFSET,
+												SECOND_ITEM_ROW_OFFSET,
+												THIRD_ITEM_COLUMN_SIZE,
+												SECOND_ITEM_ROW_SIZE);
+		cutButton.setText("cut");
+		cutButton.setToolTipText("Finish the current segment and instantly begin a new one");
+		cutButton.setFont(new Font("Dialog", Font.PLAIN, 14));
+		cp.add(cutButton);
+		
+		saveButton.setBounds(FIRST_ITEM_COLUMN_OFFSET,
+												 THIRD_ITEM_ROW_OFFSET,
+												 FIRST_ITEM_COLUMN_SIZE,
+												 THIRD_ITEM_ROW_SIZE);
+		saveButton.setText("save");
+		saveButton.setToolTipText("Save the current project to a file");
 		saveButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cp.add(saveButton);
 		
-		loadButton.setBounds(115, 60, 95, 25);
-		loadButton.setText("load times");
+		loadButton.setBounds(SECOND_ITEM_COLUMN_OFFSET,
+												 THIRD_ITEM_ROW_OFFSET,
+												 SECOND_ITEM_COLUMN_SIZE,
+												 THIRD_ITEM_ROW_SIZE);
+		loadButton.setText("load");
+		loadButton.setToolTipText("Load a project from a file");
 		loadButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cp.add(loadButton);
 		
-		resetButton.setBounds(220, 60, 80, 25);
+		resetButton.setBounds(THIRD_ITEM_COLUMN_OFFSET,
+													THIRD_ITEM_ROW_OFFSET,
+													THIRD_ITEM_COLUMN_SIZE,
+													THIRD_ITEM_ROW_SIZE);
 		resetButton.setText("reset");
-		resetButton.setFont(new Font("Dialog", Font.PLAIN, 16));
+		resetButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		resetButton.setBackground(new Color(255, 200, 200));
 		cp.add(resetButton);
 		
 		
-		tableScrollPane.setBounds(10, 100, 291, 23 + TABLE_ROWS * 16);
-		tableModel = new DefaultTableModel() {
-			private static final long serialVersionUID = 4218091309598726974L;
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-		table.setModel(tableModel);
-		table.setFillsViewportHeight(true);
-		table.setCellSelectionEnabled(true);
-		table.setColumnSelectionAllowed(true);
-		table.setRowSelectionAllowed(true);
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
-		table.setDragEnabled(false);
+		// TABLE
+		// set ScrollPane properties
+		tableScrollPane.setBounds(FIRST_ITEM_COLUMN_OFFSET,
+															FOURTH_ITEM_ROW_OFFSET,
+															FULL_WIDTH_COLUMN_SIZE,
+															FOURTH_ITEM_ROW_SIZE);
 		tableScrollPane.setAutoscrolls(true);
 		tableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		tableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		// set table colums
-		tableModel.addColumn("Date");
-		tableModel.addColumn("Time");
+		initializeTable();
 		cp.add(tableScrollPane);
 		
 		
@@ -182,17 +271,24 @@ public class SimeTimer extends JFrame {
 					currentStartTime = System.currentTimeMillis();
 					startStopButton.setText("Stop");
 					enableDisplayTimer(true);
-					// TODO: Save date
-					// TODO: List entry? or second label
 				} else {
 					// button OFF - STOP the timer
-					accumulatedTime += System.currentTimeMillis() - currentStartTime;
+					TimeChunk newestTimeChunk = new TimeChunk(currentStartTime);
 					startStopButton.setText("Start");
 					enableDisplayTimer(false);
-					displayCurrentTime();
-					// TODO: Save time to project
-					// TODO: Refresh list
+					project.addTimeChunk(newestTimeChunk);
+					lastProjectTime = project.getProjectTime();
+					tableModel.addRow(newestTimeChunk.toStringArray(tableModel.getRowCount()+1));
+					refreshTimeLabels();
+					scrollDown();
 				}
+			}
+		});
+		
+		cutButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				cut();
 			}
 		});
 		
@@ -203,8 +299,8 @@ public class SimeTimer extends JFrame {
 			}
 		});
 		
+		// SAVE
 		SaveLoadAction saveButtonAction = new SaveLoadAction(this) {
-			// TODO: Save project instead of single time
 			private static final long serialVersionUID = 7117119994405070822L;
 			@Override
 			void call(JFileChooser fileChooser, JFrame owner) {
@@ -212,31 +308,45 @@ public class SimeTimer extends JFrame {
 				int option = fileChooser.showSaveDialog(owner);
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved save
-	      	saveToFile(fileChooser.getSelectedFile());
+	      	saveManager.saveProjectToByteFile(project, fileChooser.getSelectedFile());
 	      	usedPath = fileChooser.getSelectedFile().getParent();
 	      }
 			}
 		};
 		saveButton.addActionListener(saveButtonAction);
 		
+		// LOAD
 		SaveLoadAction loadButtonAction = new SaveLoadAction(this) {
-			// TODO: Load project instead of single time
 			private static final long serialVersionUID = 7117119994405070822L;
 			@Override
 			void call(JFileChooser fileChooser, JFrame owner) {
+				// TODO: unsaved changes? prompt
+				if (ASK_FOR_SAVE_ON_LOAD) {
+					if (JOptionPane.showConfirmDialog(owner,
+																						"Your current project is not saved.\nDo you want to save it before loading?",
+																						"Project not saved",
+																						JOptionPane.YES_NO_OPTION,
+																						JOptionPane.QUESTION_MESSAGE)
+							== JOptionPane.YES_OPTION) {
+						// user wants to save project
+						saveButton.doClick();
+					}
+				}
 				// call fileChooser and store feedback
 				int option = fileChooser.showOpenDialog(owner);
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved save
-					loadFromFile(fileChooser.getSelectedFile());
+					project = saveManager.loadProjectFromByteFile(fileChooser.getSelectedFile());
 					usedPath = fileChooser.getSelectedFile().getParent();
+					refreshTimeLabels();
+					refreshTable();
 				}
 			}
 		};
 		loadButton.addActionListener(loadButtonAction);
 		
 		
-		// save preferences on close
+		// save preferences and ask for save on close
 		addWindowListener(new WindowListener() {
 			@Override
 			public void windowActivated(WindowEvent evt) {}
@@ -245,7 +355,18 @@ public class SimeTimer extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent evt) {
 				savePreferences();
-				// TODO: Prompt about saving
+				// TODO: not saved already?
+				if (ASK_FOR_SAVE_ON_CLOSE) {
+					if (JOptionPane.showConfirmDialog(evt.getComponent(),
+																						"Your current project is not saved.\nDo you want to save it before exiting?",
+																						"Project not saved",
+																						JOptionPane.YES_NO_OPTION,
+																						JOptionPane.QUESTION_MESSAGE)
+							== JOptionPane.YES_OPTION) {
+						// user wants to save project
+						saveButton.doClick();
+					}
+				}
 			}
 			@Override
 			public void windowDeactivated(WindowEvent evt) {}
@@ -260,11 +381,14 @@ public class SimeTimer extends JFrame {
 
 		
 		// frame ready
+		refreshTimeLabels();
 		setVisible(true);
 		
 		
 		// TODO: open previous project by default
-		
+		if (ASK_FOR_LOAD_ON_STARTUP) {
+			// magic happens
+		}
 	}
 	
 	
@@ -277,17 +401,95 @@ public class SimeTimer extends JFrame {
 		return startStopButton.isSelected();
 	}
 	
+	private void cut() {
+		long temp = System.currentTimeMillis();
+		if (!running()) {
+			return;
+		}
+		TimeChunk newestTimeChunk = new TimeChunk(currentStartTime, temp - currentStartTime);
+		currentStartTime = System.currentTimeMillis();
+		project.addTimeChunk(newestTimeChunk);
+		lastProjectTime = project.getProjectTime();
+		tableModel.addRow(newestTimeChunk.toStringArray(tableModel.getRowCount()+1));
+		scrollDown();
+	}
+	
 	/**
 	 * resets the timer
 	 */
 	private void reset() {
-		// TODO: reset whole project
-		accumulatedTime = 0L;
-		if (running()) {
-			currentStartTime = System.currentTimeMillis();
-		} else {
-			displayCurrentTime();
+		if (JOptionPane.showConfirmDialog(this,
+																			"Do you really want to reset your current project?",
+																			"Reset project",
+																			JOptionPane.YES_NO_CANCEL_OPTION,
+																			JOptionPane.QUESTION_MESSAGE)
+				== JOptionPane.YES_OPTION) {
+			// user wants to reset
+			if (running()) {
+				startStopButton.doClick();
+			}
+			project = new SimeTimerProject();
+			refreshTimeLabels();
+			refreshTable();
 		}
+	}
+	
+	private void initializeTable() {
+		// set tableModel
+		tableModel = new DefaultTableModel() {
+			private static final long serialVersionUID = 4218091309598726974L;
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		table.setModel(tableModel);
+		
+		// set table properties
+		table.setFillsViewportHeight(true);
+		table.setCellSelectionEnabled(true);
+		table.setColumnSelectionAllowed(true);
+		table.setRowSelectionAllowed(true);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+		table.setDragEnabled(false);
+		
+		// set table colums
+		tableModel.addColumn("#");
+		tableModel.addColumn("Start date");
+		tableModel.addColumn("Time");
+		
+		TableColumnModel columns = table.getColumnModel();
+		// set column widths
+		columns.getColumn(0).setResizable(false);
+		columns.getColumn(0).setMinWidth(12);
+		columns.getColumn(0).setMaxWidth(35);
+		columns.getColumn(0).setPreferredWidth(30);
+		columns.getColumn(1).setResizable(false);
+		columns.getColumn(1).setMinWidth(130);
+		columns.getColumn(1).setMaxWidth(170);
+		columns.getColumn(1).setPreferredWidth(140);
+		columns.getColumn(2).setResizable(false);
+		
+		// set alignment
+		DefaultTableCellRenderer rightAligner = new DefaultTableCellRenderer();
+		rightAligner.setHorizontalAlignment(SwingConstants.RIGHT);
+		DefaultTableCellRenderer centerAligner = new DefaultTableCellRenderer();
+		centerAligner.setHorizontalAlignment(SwingConstants.CENTER);
+		columns.getColumn(0).setCellRenderer(rightAligner);
+		columns.getColumn(1).setCellRenderer(rightAligner);
+		columns.getColumn(2).setCellRenderer(centerAligner);
+	}
+	
+	private void refreshTable() {
+		// empty the table
+		while (tableModel.getRowCount() > 0) {
+			tableModel.removeRow(0);
+		}
+		// add new data from project
+		for (int i=0; i<project.size(); i++) {
+			tableModel.addRow(project.getTimeChunkAt(i).toStringArray(i+1));
+		}
+		scrollDown();
 	}
 	
 	/**
@@ -295,11 +497,11 @@ public class SimeTimer extends JFrame {
 	 */
 	private void scrollDown() {
 		tableScrollPane.getVerticalScrollBar().setValue(
-				tableScrollPane.getVerticalScrollBar().getMaximum());
+				tableScrollPane.getVerticalScrollBar().getMaximum() - 1);
 	}
 	
 	/**
-	 * generates a String for the timerLabel from a given time in milliseconds
+	 * generates a String for the time labels from a given time in milliseconds
 	 * @param time the stopped time to be displayed, in milliseconds
 	 * @return a {@link String} representing the stopped time in a readable format
 	 */
@@ -327,18 +529,25 @@ public class SimeTimer extends JFrame {
 	}
 	
 	/**
-	 * updates the timerLabel to the current stopped time
+	 * updates the time labels to the current stopped time
 	 */
-	private void displayCurrentTime() {
-		String result;
+	private void refreshTimeLabels() {
+		String total, chunk="0";
 		if (running()) {
-			result = timeToString(accumulatedTime +
-														System.currentTimeMillis() - currentStartTime);
+			total = timeToString(lastProjectTime +
+													 System.currentTimeMillis() - currentStartTime);
+			chunk = timeToString(System.currentTimeMillis() - currentStartTime);
 		} else {
-			result = timeToString(accumulatedTime);
+			updateProjectTime();
+			total = timeToString(lastProjectTime);
+			chunk = timeToString(project.getLastChunkTime());
 		}
-		timerLabel.setText(result);
-		// TODO: refresh second label
+		totalTimeLabel.setText(total);
+		chunkTimeLabel.setText(chunk);
+	}
+	
+	private void updateProjectTime() {
+		lastProjectTime = project.getProjectTime();
 	}
 	
 	/**
@@ -351,7 +560,7 @@ public class SimeTimer extends JFrame {
 			displayTask = new TimerTask() {
 	      @Override
 	      public void run() {
-	      	displayCurrentTime();
+	      	refreshTimeLabels();
 	      }
 			};
 			displayTimer = new Timer();
@@ -365,35 +574,6 @@ public class SimeTimer extends JFrame {
 		}
 	}
 	
-	
-	// SAVE / LOAD
-	
-	/**
-	 * saves the measured time at the moment of mathod call into the saveManager
-	 */
-	private void saveToFile(File saveFile) {
-		long time = accumulatedTime;
-		if (running()) {
-			time += System.currentTimeMillis() - currentStartTime;
-		}
-		saveManager.saveToFile(Long.toString(time) + System.lineSeparator(), saveFile);
-	}
-	
-	/**
-	 * gets the saved time from the saveManager and puts it in place of the measured time
-	 */
-	private void loadFromFile(File saveFile) {
-		long loaded = saveManager.loadFromFile(saveFile);
-		if (loaded == -1L) {
-			return;
-		}
-		accumulatedTime = loaded;
-		if (running()) {
-			currentStartTime = System.currentTimeMillis();
-		} else {
-			displayCurrentTime();
-		}
-	}
 	
 	
 	// PREFERENCES
@@ -466,12 +646,12 @@ public class SimeTimer extends JFrame {
 				@Override
 				public boolean accept(File file) {
 					return file.isDirectory() ||
-								 file.isFile() && file.getName().endsWith(".save") ||
+								 file.isFile() && file.getName().endsWith(".stp") ||
 								 !file.getName().contains(".");
 				}
 				@Override
 				public String getDescription() {
-					return ".save files";
+					return ".stp files";
 				}
 			});
 			// call customizable method

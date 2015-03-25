@@ -43,7 +43,7 @@ public class SaveManager {
 	 * @param data the String to save into the given File
 	 * @param saveFile the File to save the given String into
 	 */
-	void saveToFile(String data, File saveFile) {
+	public void saveToPlainFile(String data, File saveFile) {
 		BufferedWriter output;
 		try {
 			output = new BufferedWriter(new FileWriter(saveFile));
@@ -65,7 +65,7 @@ public class SaveManager {
 	 * @param saveFile the File to load from
 	 * @return a long parsed from the File's first line or -1L on errors
 	 */
-	long loadFromFile(File saveFile) {
+	public long loadFromPlainFile(File saveFile) {
 		BufferedReader input = null;
 		long data;
 		try {
@@ -113,24 +113,24 @@ public class SaveManager {
 	
 	
 	
-	// CHUNKS
+	// TIMECHUNKS
 	
 	/**
-	 * saves a given {@link SimeTimerProject} to a file on the specified path.
+	 * saves a given {@link SimeTimerProject} to the specified file.
 	 * Uses byte coded file format.
 	 * Handles Exceptions.
 	 * @param project the {@link SimeTimerProject} to save
-	 * @param savePath the filepath to save the {@link SimeTimerProject} in
+	 * @param saveFile the {@link File} to save the {@link SimeTimerProject} in
 	 */
-	void saveProjectToFile(SimeTimerProject project, String savePath) {
+	public void saveProjectToByteFile(SimeTimerProject project, File saveFile) {
 		try {
-			DataOutputStream output = new DataOutputStream(new FileOutputStream(savePath));
+			DataOutputStream output = new DataOutputStream(new FileOutputStream(saveFile));
 			// for every TimeChunk:
-			for (int i=0; i<project.getNumberOfTimeChunks(); i++) {
+			for (int i=0; i<project.size(); i++) {
 				// write startDate as long
-				output.writeLong(project.getTimeChunk(i).getStartDate().getTime());
+				output.writeLong(project.getTimeChunkAt(i).getStartDate().getTime());
 				// write stoppedTime
-				output.writeLong(project.getTimeChunk(i).getStoppedTime());
+				output.writeLong(project.getTimeChunkAt(i).getStoppedTime());
 			}
 			output.close();
 		} catch (FileNotFoundException e) {
@@ -149,18 +149,18 @@ public class SaveManager {
 	}
 	
 	/**
-	 * loads a {@link SimeTimerProject} from a file on the specified path.
+	 * loads a {@link SimeTimerProject} from the specified file.
 	 * Can only read files written by {@link saveProjectToFile(SimeTimerProject, String)}.
 	 * Handles Exceptions.
-	 * @param loadPath the filepath to load the {@link SimeTimerProject} from
+	 * @param loadFile the {@link File} to load the {@link SimeTimerProject} from
 	 * @return a new {@link SimeTimerProject} with the data from the file
 	 * 				 or null when Exceptions occur.
 	 */
-	SimeTimerProject loadProjectFromFile(String loadPath) {
+	public SimeTimerProject loadProjectFromByteFile(File loadFile) {
 		SimeTimerProject result = new SimeTimerProject();
 		DataInputStream input = null;
 		try {
-			input = new DataInputStream(new FileInputStream(loadPath));
+			input = new DataInputStream(new FileInputStream(loadFile));
 			while (input.available() >= 2 * Long.BYTES) {
 				result.addTimeChunk(new TimeChunk(input.readLong(),
 																					input.readLong()));
@@ -192,6 +192,30 @@ public class SaveManager {
 		return result;
 	}
 	
+	/**
+	 * saves a given {@link SimeTimerProject} to the specified file.
+	 * Uses byte coded file format.
+	 * Handles Exceptions.
+	 * @param project the {@link SimeTimerProject} to save
+	 * @param saveFile the {@link File} to save the {@link SimeTimerProject} in
+	 */
+	public void saveProjectToPlainFile(SimeTimerProject project, File saveFile) {
+		// TODO: implement
+	}
+	
+	/**
+	 * loads a {@link SimeTimerProject} from the specified file.
+	 * Can only read files written by {@link saveProjectToFile(SimeTimerProject, String)}.
+	 * Handles Exceptions.
+	 * @param loadFile the {@link File} to load the {@link SimeTimerProject} from
+	 * @return a new {@link SimeTimerProject} with the data from the file
+	 * 				 or null when Exceptions occur.
+	 */
+	public SimeTimerProject loadProjectFromPlainFile(File loadFile) {
+		// TODO: implement
+		return null;
+	}
+	
 	
 
 	// PREFERENCES
@@ -203,7 +227,7 @@ public class SaveManager {
 	 * @param yPosition last y position of the {@link JFrame}
 	 * @param usedPath last used save/load path
 	 */
-	void savePreferences(int xPosition,
+	public void savePreferences(int xPosition,
 											 int yPosition,
 											 String usedPath) {
 		// check for positions too close to the screen edge
@@ -241,7 +265,7 @@ public class SaveManager {
 	 * setPreferences() method.
 	 * Handles Exceptions.
 	 */
-	void loadAndSetPreferences() {
+	public void loadAndSetPreferences() {
 		// set default values
 		int xPosition = SimeTimer.DEFAULT_X_POSITION;
 		int yPosition = SimeTimer.DEFAULT_Y_POSITION;
