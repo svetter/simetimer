@@ -16,6 +16,9 @@ import java.util.Date;
  */
 public class TimeChunk {
 	
+	/**
+	 * specifies the {@link DateFormat} used by the {@link dateToString(Date)} method
+	 */
 	public static final DateFormat DATE_FORMAT = new SimpleDateFormat("d. M. yyyy, HH:mm:ss");
 	
 	private Date startDate;
@@ -40,7 +43,12 @@ public class TimeChunk {
 	public TimeChunk(long startDateMillis, long stoppedTime) {
 		this(new Date(startDateMillis), stoppedTime);
 	}
-	
+	/**
+	 * creates a TimeChunk that runs from the given start date
+	 * unto the moment this constructor is called
+	 * @param startDateMillis the start time of the measuremtent
+	 * 				represented in milliseconds
+	 */
 	public TimeChunk(long startDateMillis) {
 		this(new Date(), System.currentTimeMillis() - startDateMillis);
 	}

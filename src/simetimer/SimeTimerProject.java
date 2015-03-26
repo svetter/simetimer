@@ -3,6 +3,8 @@ package simetimer;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Documentation
+
 /**
  * models a project in the SimeTimer application
  * @author Simon Vetter
