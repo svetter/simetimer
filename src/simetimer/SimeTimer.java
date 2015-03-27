@@ -20,7 +20,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 /**
- * a slick stopwatch
+ * The {@link SimeTimer} is a slick but powerful stopwatch designed
+ * to keep track of the time one puts into one ore many different projects.
+ * As well as one can use it like a traditional stopwatch
+ * (including a lap function), you can accumulate sessions, of which the
+ * {@link SimeTimer} will store start date and time as well as the
+ * elapsed time between two presses of the start/stop-button.
  * 
  * @author Simon Vetter
  *
@@ -295,7 +300,7 @@ public class SimeTimer extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
 				cut();
-				// FIXME
+				// TODO remove
 				scrollDown();
 			}
 		});
@@ -319,7 +324,6 @@ public class SimeTimer extends JFrame {
 					saveManager.saveProject(project, fileChooser.getSelectedFile(), FILE_FORMAT);
 					unsavedData = false;
 					usedFile = fileChooser.getSelectedFile();
-					// TODO
 				}
 			}
 		};
@@ -346,7 +350,6 @@ public class SimeTimer extends JFrame {
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved load
 					SimeTimerProject temp = saveManager.loadProject(fileChooser.getSelectedFile(), FILE_FORMAT);
-					// TODO
 					if (temp != null) {
 						// loading successful
 						project = temp;

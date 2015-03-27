@@ -6,11 +6,12 @@ import java.util.Date;
 
 
 /**
- * Represents the segment of time between the press of the timer's
+ * Represents the segment of time between the press of the {@link SimeTimer}'s
  * start button and the press of its stop button.
  * Stores the elapsed time in a long (in milliseconds), plus
  * a {@link Date} instance from both the beginning and the end
  * of the measurement.
+ * 
  * @author Simon Vetter
  *
  */
