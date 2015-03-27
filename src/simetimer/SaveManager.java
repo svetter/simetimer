@@ -56,15 +56,15 @@ public class SaveManager {
 	/**
 	 * default path for the preferences file
 	 */
-	public static final String PREFERENCES_PATH = "assets/SimeTimer.cfg";
+	public static final String PREFERENCES_PATH = "SimeTimer.cfg";
 	
 	// unified error messages
 	private static final String SAVE_ERROR = "Save error",
 															LOAD_ERROR = "Load error",
 															SAVING_FAILED = "Saving to file failed:\n",
 															LOADING_FAILED = "Loading from file failed:\n",
-															PREF_SAVING_FAILED = "Preferences saving failed: ",
-															PREF_LOADING_FAILED = "Preferences loading failed: ",
+															CONFIG_SAVING_FAILED = "Configuration saving failed: ",
+															CONFIG_LOADING_FAILED = "Configuration loading failed: ",
 															CLOSING_FAILED = "File could not be closed.",
 															REASON_FILE_NOT_FOUND = "The file could not be found.",
 															REASON_FILE_CORRUPTED = "The file could not be read.",
@@ -74,7 +74,7 @@ public class SaveManager {
 	/**
 	 * the parent {@link JFrame} for save/load dialogs
 	 */
-	private SimeTimer owner;
+	private final SimeTimer owner;
 
 	/**
 	 * constructor stores owner {@link JFrame}
@@ -146,7 +146,7 @@ public class SaveManager {
 																		LOAD_ERROR,
 																		JOptionPane.ERROR_MESSAGE);
 			return null;
-		} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+		} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
 			// save file corrupted
 			JOptionPane.showMessageDialog(owner,
 																		LOADING_FAILED + REASON_FILE_CORRUPTED,
@@ -220,6 +220,7 @@ public class SaveManager {
 			System.err.println(CLOSING_FAILED);
 		}
 		// no Exceptions
+		result.sortTimes();
 		return result;
 	}
 	
@@ -287,25 +288,35 @@ public class SaveManager {
 	 * @param yPosition last y position of the {@link JFrame}
 	 * @param usedPath last used save/load path
 	 */
-	public void savePreferences(int xPosition,
-															int yPosition,
-															File usedFile) {
+	// TODO update documentation
+	static void saveConfig(boolean loadLastSaveOnStartup,
+												 boolean askForSaveOnLoad,
+												 boolean askForSaveOnClose,
+												 int fileFormat,
+												 int xPosition,
+												 int yPosition,
+												 File usedFile) {
 		// check for positions too close to the screen edge
 		if (xPosition < 0) {
 			xPosition = 0;
+		} else if (xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH) {
+			xPosition = SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH;
 		}
 		if (yPosition < 0) {
 			yPosition = 0;
-		}
-		if (xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH) {
-			xPosition = SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH;
-		}
-		if (yPosition > SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT) {
+		} else if (yPosition > SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT) {
 			yPosition = SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT;
 		}
+		// main work begins here
 		try {
 			DataOutputStream output = new DataOutputStream(new FileOutputStream(PREFERENCES_PATH));
 			// write data
+			// options:
+			output.writeBoolean(loadLastSaveOnStartup);
+			output.writeBoolean(askForSaveOnLoad);
+			output.writeBoolean(askForSaveOnClose);
+			output.writeInt(fileFormat);
+			// preferences:
 			output.writeInt(xPosition);
 			output.writeInt(yPosition);
 			output.writeBoolean(usedFile != null);
@@ -315,10 +326,10 @@ public class SaveManager {
 			output.close();
 		} catch (FileNotFoundException e) {
 			// preferences file couldn't be found
-			System.err.println(PREF_SAVING_FAILED + REASON_FILE_NOT_FOUND);
+			System.err.println(CONFIG_SAVING_FAILED + REASON_FILE_NOT_FOUND);
 		} catch (IOException | NullPointerException e) {
 			// unknown error
-			System.err.println(PREF_SAVING_FAILED + REASON_UNKNOWN);
+			System.err.println(CONFIG_SAVING_FAILED + REASON_UNKNOWN);
 		}
 	}
 	
@@ -328,15 +339,27 @@ public class SaveManager {
 	 * setPreferences() method.
 	 * Handles Exceptions.
 	 */
-	public void loadAndSetPreferences() {
+	// TODO update documentation
+	static void loadAndSetConfig(ConfigManager callback) {
 		// set default values
-		int xPosition = SimeTimer.DEFAULT_X_POSITION;
-		int yPosition = SimeTimer.DEFAULT_Y_POSITION;
-		String usedPath = SimeTimer.DEFAULT_PATH;
+		boolean loadLastSaveOnStartup = ConfigManager.DEFAULT_LOAD_LAST_SAVE_ON_STARTUP;
+		boolean askForSaveOnLoad = ConfigManager.DEFAULT_ASK_FOR_SAVE_ON_LOAD;
+		boolean askForSaveOnClose = ConfigManager.DEFAULT_ASK_FOR_SAVE_ON_CLOSE;
+		int fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
+		int xPosition = ConfigManager.DEFAULT_X_POSITION;
+		int yPosition = ConfigManager.DEFAULT_Y_POSITION;
+		String usedPath = ConfigManager.DEFAULT_PATH;
+		// begin IO work
 		DataInputStream input = null;
 		try {
 			input = new DataInputStream(new FileInputStream(PREFERENCES_PATH));
 			// read data
+			// options:
+			loadLastSaveOnStartup = input.readBoolean();
+			askForSaveOnLoad = input.readBoolean();
+			askForSaveOnClose = input.readBoolean();
+			fileFormat = input.readInt();
+			// preferences:
 			xPosition = input.readInt();
 			yPosition = input.readInt();
 			boolean usedPathWritten = input.readBoolean();
@@ -345,10 +368,10 @@ public class SaveManager {
 			}
 		} catch (FileNotFoundException e) {
 			// preferences file couldn't be found
-			System.err.println(PREF_LOADING_FAILED + REASON_FILE_NOT_FOUND);
+			System.err.println(CONFIG_LOADING_FAILED + REASON_FILE_NOT_FOUND);
 		} catch (IOException e) {
 			// unknown error
-			System.err.println(PREF_LOADING_FAILED + REASON_UNKNOWN);
+			System.err.println(CONFIG_LOADING_FAILED + REASON_UNKNOWN);
 		} finally {
 			// try to close file
 			try {
@@ -359,18 +382,25 @@ public class SaveManager {
 				// wasn't opened at all
 			}
 		}
+		// no Exceptions
 		// check validity
-		if (xPosition < 0 ||
-				yPosition < 0 ||
-				xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH ||
-				yPosition > SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT) {
-			xPosition = SimeTimer.DEFAULT_X_POSITION;
-			yPosition = SimeTimer.DEFAULT_Y_POSITION;
-			usedPath = SimeTimer.DEFAULT_PATH;
+		if (fileFormat != SaveManager.FILE_FORMAT_PLAIN
+				&& fileFormat != SaveManager.FILE_FORMAT_BYTE) {
+			// reset file format to default
+			fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
+		}
+		if (xPosition < 0
+				|| yPosition < 0
+				|| xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH
+				|| yPosition > SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT) {
+			// reset position on screen to default
+			xPosition = ConfigManager.DEFAULT_X_POSITION;
+			yPosition = ConfigManager.DEFAULT_Y_POSITION;
 		}
 		File usedFile = usedPath != null && !usedPath.equals(NULL_PATH) ? new File(usedPath) : null;
-		// feed back preferences
-		owner.setPreferences(xPosition, yPosition, usedFile);
+		// feed back options and preferences
+		callback.setOptions(loadLastSaveOnStartup, askForSaveOnLoad, askForSaveOnClose, fileFormat);
+		callback.setPreferences(xPosition, yPosition, usedFile);
 	}
 	
 	

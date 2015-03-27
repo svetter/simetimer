@@ -114,40 +114,9 @@ public class SimeTimer extends JFrame {
 	public static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
 	
 	
-	// app behaviour
-	/**
-	 * determines whether the SimeTimer asks the user if he wants to save when
-	 * they attempt to close an unsaved project
-	 */
-	private static final boolean ASK_FOR_SAVE_ON_CLOSE = false;
-	/**
-	 * determines whether the SimeTimer asks the user if he wants to save when
-	 * they attempt to load a project while having another unsaved one open
-	 */
-	private static final boolean ASK_FOR_SAVE_ON_LOAD = true;
-	/**
-	 * determines whether the SimeTimer automatically loads the last used project
-	 * (if available) when the app is started
-	 */
-	private static final boolean LOAD_LAST_SAVE_ON_STARTUP = true;
-	/**
-	 * determines the file format that will be used to save and load {@link SimeTimerProject}s
-	 */
-	public static final int FILE_FORMAT = SaveManager.FILE_FORMAT_PLAIN;
+	private final SimeTimer THIS = this;
 	
-	// default preferences
-	/**
-	 * the default x position of the {@link JFrame} on screen
-	 */
-	public static final int DEFAULT_X_POSITION = (int) ((3. / 4.) * SCREEN_WIDTH);
-	/**
-	 * the default y position of the {@link JFrame} on screen
-	 */
-	public static final int DEFAULT_Y_POSITION = (int) ((1. / 3.) * SCREEN_HEIGHT);
-	/**
-	 * the default file path for the {@link JFileChooser}
-	 */
-	public static final String DEFAULT_PATH = null;
+	
 	
 	
 	
@@ -177,7 +146,8 @@ public class SimeTimer extends JFrame {
 	
 	// project and saving
 	private SimeTimerProject project;
-	private SaveManager saveManager;
+	SaveManager saveManager;
+	ConfigManager config;
 	/**
 	 * last used file to save or load. Can be null!
 	 */
@@ -193,6 +163,7 @@ public class SimeTimer extends JFrame {
 		
 		project = new SimeTimerProject();
 		saveManager = new SaveManager(this);
+		config = new ConfigManager(this);
 		unsavedData = false;
 		
 		
@@ -200,7 +171,7 @@ public class SimeTimer extends JFrame {
 		
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
-		saveManager.loadAndSetPreferences();
+		config.initialize();
 		setResizable(false);
 		Container cp = getContentPane();
 		cp.setLayout(null);
@@ -312,7 +283,6 @@ public class SimeTimer extends JFrame {
 					// update labels and table
 					refreshTimeLabels();
 					tableModel.addRow(project.getStringArray(project.size() - 1));
-					// FIXME
 					scrollDown();
 				}
 			}
@@ -343,7 +313,7 @@ public class SimeTimer extends JFrame {
 				int option = fileChooser.showSaveDialog(owner);
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved save
-					saveManager.saveProject(project, fileChooser.getSelectedFile(), FILE_FORMAT);
+					saveManager.saveProject(project, fileChooser.getSelectedFile(), config.fileFormat);
 					unsavedData = false;
 					usedFile = fileChooser.getSelectedFile();
 				}
@@ -356,7 +326,7 @@ public class SimeTimer extends JFrame {
 			private static final long serialVersionUID = 7117119994405070822L;
 			@Override
 			void call(JFileChooser fileChooser, JFrame owner) {
-				if (unsavedData && ASK_FOR_SAVE_ON_LOAD) {
+				if (unsavedData && config.askForSaveOnLoad) {
 					if (JOptionPane.showConfirmDialog(owner,
 																						"Your current project is not saved.\nDo you want to save it before loading?",
 																						"Project not saved",
@@ -371,7 +341,7 @@ public class SimeTimer extends JFrame {
 				int option = fileChooser.showOpenDialog(owner);
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved load
-					SimeTimerProject temp = saveManager.loadProject(fileChooser.getSelectedFile(), FILE_FORMAT);
+					SimeTimerProject temp = saveManager.loadProject(fileChooser.getSelectedFile(), config.fileFormat);
 					if (temp != null) {
 						// loading successful
 						project = temp;
@@ -392,7 +362,7 @@ public class SimeTimer extends JFrame {
 		optionsButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				// TODO Options: ASK_FOR_SAVE_ON_CLOSE, ASK_FOR_SAVE_ON_LOAD, LOAD_LAST_SAVE_ON_STARTUP, FILE_FORMAT
+				new OptionFrame(THIS, config);
 			}
 		});
 		
@@ -402,11 +372,10 @@ public class SimeTimer extends JFrame {
 			public void windowActivated(WindowEvent evt) {}
 			@Override
 			public void windowClosed(WindowEvent evt) {}
-			@SuppressWarnings("unused")
 			@Override
 			public void windowClosing(WindowEvent evt) {
-				savePreferences();
-				if (unsavedData && ASK_FOR_SAVE_ON_CLOSE) {
+				config.saveConfiguration();
+				if (unsavedData && config.askForSaveOnClose) {
 					if (JOptionPane.showConfirmDialog(evt.getComponent(),
 																						"Your current project is not saved.\nDo you want to save it before exiting?",
 																						"Project not saved",
@@ -439,9 +408,9 @@ public class SimeTimer extends JFrame {
 		
 		if (usedFile != null &&
 				usedFile.isFile() &&
-				LOAD_LAST_SAVE_ON_STARTUP) {
+				config.loadLastSaveOnStartup) {
 			// open last used project
-			SimeTimerProject temp = saveManager.loadProject(usedFile, FILE_FORMAT);
+			SimeTimerProject temp = saveManager.loadProject(usedFile, config.fileFormat);
 			if (temp != null) {
 				project = temp;
 				refreshTimeLabels();
@@ -480,7 +449,6 @@ public class SimeTimer extends JFrame {
 		project.addTimeChunk(newestTimeChunk);
 		updateProjectTime();
 		tableModel.addRow(project.getStringArray(project.size()-1));
-		// FIXME
 		scrollDown();
 	}
 	
@@ -576,7 +544,6 @@ public class SimeTimer extends JFrame {
 		for (int i = 0; i < project.size(); i++) {
 			tableModel.addRow(project.getStringArray(i));
 		}
-		// FIXME
 		scrollDown();
 	}
 	
@@ -663,27 +630,7 @@ public class SimeTimer extends JFrame {
 	}
 	
 	
-	// PREFERENCES
 	
-	/**
-	 * feeds preference data into saveManager to be saved there
-	 */
-	private void savePreferences() {
-		saveManager.savePreferences(getLocationOnScreen().x,
-				getLocationOnScreen().y, usedFile);
-	}
-	
-	/**
-	 * this method is called by the {@link SaveManager} to feed back the loaded
-	 * preferences
-	 * @param xPosition last saved x position of the {@link JFrame}
-	 * @param yPosition last saved y position of the {@link JFrame}
-	 * @param usedPath last saved save/load path
-	 */
-	void setPreferences(int xPosition, int yPosition, File usedFile) {
-		setLocation(xPosition, yPosition);
-		this.usedFile = usedFile;
-	}
 	
 	
 	
