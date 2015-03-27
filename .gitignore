@@ -10,5 +10,5 @@
 # Backup files
 *.bak
 
-# SimeTimer options file
-*.options
+# SimeTimer preferences file
+*.cfg

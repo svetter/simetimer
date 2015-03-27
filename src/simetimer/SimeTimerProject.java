@@ -67,15 +67,29 @@ public class SimeTimerProject {
 	}
 	
 	/**
-	 * returns the stoppedTime of the last added {@link TimeChunk}
-	 * @return the stoppedTime of the last added {@link TimeChunk}
+	 * returns the last added {@link TimeChunk}
+	 * @return the last added {@link TimeChunk}
+	 * 				 or null if there is none
 	 */
-	public long getLastChunkTime() {
+	public TimeChunk getLastChunk() {
 		try {
-			return timeChunks.get(size()-1).getStoppedTime();
+			return timeChunks.get(size()-1);
 		} catch (IndexOutOfBoundsException e) {
-			return 0L;
+			return null;
 		}
+	}
+	
+	/**
+	 * returns a {@link String} array with length 3
+	 * consisting of the given row index + 1 and date and time
+	 * of the TimeChunk represented as readable Strings.
+	 * @param chunkIndex the index of the desired List entry
+	 * @return a {@link String} array with length 3
+	 */
+	public String[] getStringArray(int chunkIndex) {
+		return new String[] {Integer.toString(chunkIndex + 1),
+												 TimeChunk.dateToString(timeChunks.get(chunkIndex).getStartDate()),
+												 TimeChunk.timeToString(timeChunks.get(chunkIndex).getStoppedTime())};
 	}
 	
 	/**

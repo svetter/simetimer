@@ -56,7 +56,7 @@ public class SaveManager {
 	/**
 	 * default path for the preferences file
 	 */
-	public static final String PREFERENCES_PATH = "SimeTimer.options";
+	public static final String PREFERENCES_PATH = "assets/SimeTimer.cfg";
 	
 	// unified error messages
 	private static final String SAVE_ERROR = "Save error",

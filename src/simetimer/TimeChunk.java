@@ -80,19 +80,6 @@ public class TimeChunk {
 	}
 	
 	/**
-	 * returns a {@link String} array with length 3
-	 * consisting of the given row index and date and time
-	 * of the TimeChunk represented as readable Strings.
-	 * @param rowIndex the index to fill up the array's [0] position
-	 * @return a {@link String} array with length 3
-	 */
-	public String[] toStringArray(int rowIndex) {
-		return new String[] {Integer.toString(rowIndex),
-												 dateToString(startDate),
-												 timeToString(stoppedTime)};
-	}
-	
-	/**
 	 * compares two TimeChunks by their start time firstly and
 	 * their length secondly. If both are equal, returns 0.
 	 * @param otherTimeChunk the TimeChunk to compare this one too

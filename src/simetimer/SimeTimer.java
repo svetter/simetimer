@@ -7,6 +7,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -49,17 +51,22 @@ public class SimeTimer extends JFrame {
 													 SECOND_ITEM_ROW_SIZE = 25,
 													 THIRD_ITEM_ROW_SIZE = 25,
 													 FOURTH_ITEM_ROW_SIZE = TABLE_ROWS * 16 + 22;
-	private static final int FIRST_ITEM_COLUMN_SIZE = 95,
-													 SECOND_ITEM_COLUMN_SIZE = 95,
-													 THIRD_ITEM_COLUMN_SIZE = 80,
+	private static final int FIRST_ITEM_COLUMN_SIZE = THIRD_ITEM_ROW_SIZE,
+													 SECOND_ITEM_COLUMN_SIZE = 75,
+													 THIRD_ITEM_COLUMN_SIZE = SECOND_ITEM_COLUMN_SIZE,
+													 FOURTH_ITEM_COLUMN_SIZE = 80,
 													 DOUBLE_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE +
 													 														DEFAULT_GAP +
-													 														SECOND_ITEM_COLUMN_SIZE,
+													 														SECOND_ITEM_COLUMN_SIZE +
+													 														DEFAULT_GAP +
+													 														THIRD_ITEM_COLUMN_SIZE,
 													 FULL_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE +
 													 													DEFAULT_GAP +
 													 													SECOND_ITEM_COLUMN_SIZE +
 													 													DEFAULT_GAP +
-													 													THIRD_ITEM_COLUMN_SIZE;
+													 													THIRD_ITEM_COLUMN_SIZE +
+													 													DEFAULT_GAP +
+													 													FOURTH_ITEM_COLUMN_SIZE;
 	private static final int FIRST_ITEM_ROW_OFFSET = DEFAULT_GAP,
 													 SECOND_ITEM_ROW_OFFSET = FIRST_ITEM_ROW_OFFSET +
 													 													FIRST_ITEM_ROW_SIZE	+
@@ -76,7 +83,10 @@ public class SimeTimer extends JFrame {
 													 														 DEFAULT_GAP,
 													 THIRD_ITEM_COLUMN_OFFSET = SECOND_ITEM_COLUMN_OFFSET +
 													 														SECOND_ITEM_COLUMN_SIZE +
-													 														DEFAULT_GAP;
+													 														DEFAULT_GAP,
+													 FOURTH_ITEM_COLUMN_OFFSET = THIRD_ITEM_COLUMN_OFFSET +
+													 														 THIRD_ITEM_COLUMN_SIZE +
+													 														 DEFAULT_GAP;
 	
 	
 	// window constants
@@ -154,6 +164,8 @@ public class SimeTimer extends JFrame {
 	private DefaultTableModel tableModel;
 	private JScrollPane tableScrollPane = new JScrollPane(table);
 	
+	private JButton optionsButton = new JButton();
+	
 	// logic variables
 	private long currentStartTime;
 	private long lastProjectTime;
@@ -211,49 +223,58 @@ public class SimeTimer extends JFrame {
 		chunkTimeLabel.setFont(new Font("Dialog", Font.PLAIN, 24));
 		cp.add(chunkTimeLabel);
 		
-		startStopButton.setBounds(THIRD_ITEM_COLUMN_OFFSET,
+		startStopButton.setBounds(FOURTH_ITEM_COLUMN_OFFSET,
 															FIRST_ITEM_ROW_OFFSET,
-															THIRD_ITEM_COLUMN_SIZE,
+															FOURTH_ITEM_COLUMN_SIZE,
 															FIRST_ITEM_ROW_SIZE);
 		startStopButton.setText("Start");
 		startStopButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		cp.add(startStopButton);
 		
-		cutButton.setBounds(THIRD_ITEM_COLUMN_OFFSET,
+		cutButton.setBounds(FOURTH_ITEM_COLUMN_OFFSET,
 												SECOND_ITEM_ROW_OFFSET,
-												THIRD_ITEM_COLUMN_SIZE,
+												FOURTH_ITEM_COLUMN_SIZE,
 												SECOND_ITEM_ROW_SIZE);
 		cutButton.setText("cut");
 		cutButton.setToolTipText("Finish the current segment and instantly begin a new one");
 		cutButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cp.add(cutButton);
 		
-		saveButton.setBounds(FIRST_ITEM_COLUMN_OFFSET,
+		saveButton.setBounds(SECOND_ITEM_COLUMN_OFFSET,
 												 THIRD_ITEM_ROW_OFFSET,
-												 FIRST_ITEM_COLUMN_SIZE,
+												 SECOND_ITEM_COLUMN_SIZE,
 												 THIRD_ITEM_ROW_SIZE);
 		saveButton.setText("save");
 		saveButton.setToolTipText("Save the current project to a file");
 		saveButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cp.add(saveButton);
 		
-		loadButton.setBounds(SECOND_ITEM_COLUMN_OFFSET,
+		loadButton.setBounds(THIRD_ITEM_COLUMN_OFFSET,
 												 THIRD_ITEM_ROW_OFFSET,
-												 SECOND_ITEM_COLUMN_SIZE,
+												 THIRD_ITEM_COLUMN_SIZE,
 												 THIRD_ITEM_ROW_SIZE);
 		loadButton.setText("load");
 		loadButton.setToolTipText("Load a project from a file");
 		loadButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cp.add(loadButton);
 		
-		resetButton.setBounds(THIRD_ITEM_COLUMN_OFFSET,
+		resetButton.setBounds(FOURTH_ITEM_COLUMN_OFFSET,
 													THIRD_ITEM_ROW_OFFSET,
-													THIRD_ITEM_COLUMN_SIZE,
+													FOURTH_ITEM_COLUMN_SIZE,
 													THIRD_ITEM_ROW_SIZE);
 		resetButton.setText("reset");
 		resetButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		resetButton.setBackground(new Color(255, 200, 200));
 		cp.add(resetButton);
+		
+		optionsButton.setBounds(FIRST_ITEM_COLUMN_OFFSET,
+														THIRD_ITEM_ROW_OFFSET,
+														FIRST_ITEM_COLUMN_SIZE,
+														THIRD_ITEM_ROW_SIZE);
+		//optionsButton.setText("Options");
+		optionsButton.setIcon(new ImageIcon("assets/gear.png"));
+		optionsButton.setFont(new Font("Dialog", Font.PLAIN, 14));
+		cp.add(optionsButton);
 		
 		// TABLE
 		// set ScrollPane properties
@@ -290,7 +311,8 @@ public class SimeTimer extends JFrame {
 					unsavedData = true;
 					// update labels and table
 					refreshTimeLabels();
-					tableModel.addRow(newestTimeChunk.toStringArray(tableModel.getRowCount() + 1));
+					tableModel.addRow(project.getStringArray(project.size() - 1));
+					// FIXME
 					scrollDown();
 				}
 			}
@@ -367,6 +389,13 @@ public class SimeTimer extends JFrame {
 		};
 		loadButton.addActionListener(loadButtonAction);
 		
+		optionsButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				// TODO Options: ASK_FOR_SAVE_ON_CLOSE, ASK_FOR_SAVE_ON_LOAD, LOAD_LAST_SAVE_ON_STARTUP, FILE_FORMAT
+			}
+		});
+		
 		// CLOSE: save preferences and ask for save on close
 		addWindowListener(new WindowListener() {
 			@Override
@@ -422,7 +451,6 @@ public class SimeTimer extends JFrame {
 				usedFile = usedFile.getParentFile();
 			}
 		}
-		
 	}
 	
 	
@@ -451,7 +479,8 @@ public class SimeTimer extends JFrame {
 		currentStartTime = System.currentTimeMillis();
 		project.addTimeChunk(newestTimeChunk);
 		updateProjectTime();
-		tableModel.addRow(newestTimeChunk.toStringArray(tableModel.getRowCount() + 1));
+		tableModel.addRow(project.getStringArray(project.size()-1));
+		// FIXME
 		scrollDown();
 	}
 	
@@ -524,6 +553,15 @@ public class SimeTimer extends JFrame {
 		columns.getColumn(0).setCellRenderer(rightAligner);
 		columns.getColumn(1).setCellRenderer(rightAligner);
 		columns.getColumn(2).setCellRenderer(centerAligner);
+		
+		// set automatic scrolling to the bottom on changed values
+		// FIXME
+		tableScrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				//e.getAdjustable().setValue(e.getAdjustable().getMaximum());
+			}
+		});
 	}
 	
 	/**
@@ -536,14 +574,12 @@ public class SimeTimer extends JFrame {
 		}
 		// add new data from project
 		for (int i = 0; i < project.size(); i++) {
-			tableModel.addRow(project.getTimeChunkAt(i).toStringArray(i + 1));
+			tableModel.addRow(project.getStringArray(i));
 		}
+		// FIXME
 		scrollDown();
 	}
 	
-	/**
-	 * scrolls the {@link JTable} all the way down
-	 */
 	private void scrollDown() {
 		// FIXME
 		tableScrollPane.getVerticalScrollBar().setValue(tableScrollPane.getVerticalScrollBar().getMaximum());
@@ -551,7 +587,6 @@ public class SimeTimer extends JFrame {
 	
 	/**
 	 * generates a String for the time labels from a given time in milliseconds
-	 * 
 	 * @param timen the stopped time to be displayed, in milliseconds
 	 * @return a {@link String} representing the stopped time in a readable format
 	 */
@@ -583,7 +618,7 @@ public class SimeTimer extends JFrame {
 	 * updates the time labels to the current stopped time
 	 */
 	private void refreshTimeLabels() {
-		String total, chunk = "0";
+		String total, chunk;
 		if (running()) {
 			total = timeToString(lastProjectTime +
 													 System.currentTimeMillis() - currentStartTime);
@@ -591,7 +626,8 @@ public class SimeTimer extends JFrame {
 		} else {
 			updateProjectTime();
 			total = timeToString(lastProjectTime);
-			chunk = timeToString(project.getLastChunkTime());
+			chunk = timeToString(project.getLastChunk() != null ?
+														 project.getLastChunk().getStoppedTime() : 0);
 		}
 		totalTimeLabel.setText(total);
 		chunkTimeLabel.setText(chunk);
