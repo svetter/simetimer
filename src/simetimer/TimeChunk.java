@@ -18,7 +18,7 @@ import java.util.Date;
 public class TimeChunk {
 	
 	/**
-	 * specifies the {@link DateFormat} used by the {@link dateToString(Date)} method
+	 * specifies the {@link DateFormat} used by the {@link #dateToString(Date)} method
 	 */
 	public static final DateFormat DATE_FORMAT = new SimpleDateFormat("d. M. yyyy, HH:mm:ss");
 	

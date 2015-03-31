@@ -55,55 +55,55 @@ public class SimeTimer extends JFrame {
 													 SECOND_ITEM_COLUMN_SIZE = 75,
 													 THIRD_ITEM_COLUMN_SIZE = SECOND_ITEM_COLUMN_SIZE,
 													 FOURTH_ITEM_COLUMN_SIZE = 80,
-													 DOUBLE_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE +
-													 														DEFAULT_GAP +
-													 														SECOND_ITEM_COLUMN_SIZE +
-													 														DEFAULT_GAP +
-													 														THIRD_ITEM_COLUMN_SIZE,
-													 FULL_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE +
-													 													DEFAULT_GAP +
-													 													SECOND_ITEM_COLUMN_SIZE +
-													 													DEFAULT_GAP +
-													 													THIRD_ITEM_COLUMN_SIZE +
-													 													DEFAULT_GAP +
-													 													FOURTH_ITEM_COLUMN_SIZE;
+													 DOUBLE_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE
+													 														+ DEFAULT_GAP
+													 														+ SECOND_ITEM_COLUMN_SIZE
+													 														+ DEFAULT_GAP
+													 														+ THIRD_ITEM_COLUMN_SIZE,
+													 FULL_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE
+													 													+ DEFAULT_GAP
+													 													+ SECOND_ITEM_COLUMN_SIZE
+													 													+ DEFAULT_GAP
+													 													+ THIRD_ITEM_COLUMN_SIZE
+													 													+ DEFAULT_GAP
+													 													+ FOURTH_ITEM_COLUMN_SIZE;
 	private static final int FIRST_ITEM_ROW_OFFSET = DEFAULT_GAP,
-													 SECOND_ITEM_ROW_OFFSET = FIRST_ITEM_ROW_OFFSET +
-													 													FIRST_ITEM_ROW_SIZE	+
-													 													SMALL_GAP,
-													 THIRD_ITEM_ROW_OFFSET = SECOND_ITEM_ROW_OFFSET	+
-													 												 SECOND_ITEM_ROW_SIZE +
-													 												 DEFAULT_GAP,
-													 FOURTH_ITEM_ROW_OFFSET = THIRD_ITEM_ROW_OFFSET +
-													 													THIRD_ITEM_ROW_SIZE	+
-													 													BIG_GAP;
+													 SECOND_ITEM_ROW_OFFSET = FIRST_ITEM_ROW_OFFSET
+													 													+ FIRST_ITEM_ROW_SIZE
+													 													+ SMALL_GAP,
+													 THIRD_ITEM_ROW_OFFSET = SECOND_ITEM_ROW_OFFSET
+													 												 + SECOND_ITEM_ROW_SIZE
+													 												 + DEFAULT_GAP,
+													 FOURTH_ITEM_ROW_OFFSET = THIRD_ITEM_ROW_OFFSET
+													 													+ THIRD_ITEM_ROW_SIZE
+													 													+ BIG_GAP;
 	private static final int FIRST_ITEM_COLUMN_OFFSET = DEFAULT_GAP,
-													 SECOND_ITEM_COLUMN_OFFSET = FIRST_ITEM_COLUMN_OFFSET +
-													 														 FIRST_ITEM_COLUMN_SIZE +
-													 														 DEFAULT_GAP,
-													 THIRD_ITEM_COLUMN_OFFSET = SECOND_ITEM_COLUMN_OFFSET +
-													 														SECOND_ITEM_COLUMN_SIZE +
-													 														DEFAULT_GAP,
-													 FOURTH_ITEM_COLUMN_OFFSET = THIRD_ITEM_COLUMN_OFFSET +
-													 														 THIRD_ITEM_COLUMN_SIZE +
-													 														 DEFAULT_GAP;
+													 SECOND_ITEM_COLUMN_OFFSET = FIRST_ITEM_COLUMN_OFFSET
+													 														 + FIRST_ITEM_COLUMN_SIZE
+													 														 + DEFAULT_GAP,
+													 THIRD_ITEM_COLUMN_OFFSET = SECOND_ITEM_COLUMN_OFFSET
+													 														+ SECOND_ITEM_COLUMN_SIZE
+													 														+ DEFAULT_GAP,
+													 FOURTH_ITEM_COLUMN_OFFSET = THIRD_ITEM_COLUMN_OFFSET
+													 														 + THIRD_ITEM_COLUMN_SIZE
+													 														 + DEFAULT_GAP;
 	
 	
 	// window constants
 	/**
 	 * the width of the {@link JFrame}, corrected (+6)
 	 */
-	public static final int FRAME_WIDTH = FIRST_ITEM_COLUMN_OFFSET +
-																				FULL_WIDTH_COLUMN_SIZE +
-																				DEFAULT_GAP +
-																				6;
+	public static final int FRAME_WIDTH = FIRST_ITEM_COLUMN_OFFSET
+																				+ FULL_WIDTH_COLUMN_SIZE
+																				+ DEFAULT_GAP
+																				+ 6;
 	/**
 	 * the height of the {@link JFrame}, corrected (+28)
 	 */
-	public static final int FRAME_HEIGHT = FOURTH_ITEM_ROW_OFFSET +
-																				 FOURTH_ITEM_ROW_SIZE +
-																				 DEFAULT_GAP +
-																				 28;
+	public static final int FRAME_HEIGHT = FOURTH_ITEM_ROW_OFFSET
+																				 + FOURTH_ITEM_ROW_SIZE
+																				 + DEFAULT_GAP
+																				 + 28;
 	/**
 	 * the system's main screen width, set at runtime
 	 */
@@ -292,7 +292,7 @@ public class SimeTimer extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
 				cut();
-				// TODO remove
+				// FIXME remove
 				scrollDown();
 			}
 		});
@@ -313,7 +313,7 @@ public class SimeTimer extends JFrame {
 				int option = fileChooser.showSaveDialog(owner);
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved save
-					saveManager.saveProject(project, fileChooser.getSelectedFile(), config.fileFormat);
+					saveManager.saveProject(project, fileChooser.getSelectedFile(), config.fileFormat());
 					unsavedData = false;
 					usedFile = fileChooser.getSelectedFile();
 				}
@@ -326,7 +326,7 @@ public class SimeTimer extends JFrame {
 			private static final long serialVersionUID = 7117119994405070822L;
 			@Override
 			void call(JFileChooser fileChooser, JFrame owner) {
-				if (unsavedData && config.askForSaveOnLoad) {
+				if (unsavedData && config.askForSaveOnLoad()) {
 					if (JOptionPane.showConfirmDialog(owner,
 																						"Your current project is not saved.\nDo you want to save it before loading?",
 																						"Project not saved",
@@ -341,7 +341,7 @@ public class SimeTimer extends JFrame {
 				int option = fileChooser.showOpenDialog(owner);
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved load
-					SimeTimerProject temp = saveManager.loadProject(fileChooser.getSelectedFile(), config.fileFormat);
+					SimeTimerProject temp = saveManager.loadProject(fileChooser.getSelectedFile(), config.fileFormat());
 					if (temp != null) {
 						// loading successful
 						project = temp;
@@ -375,7 +375,7 @@ public class SimeTimer extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent evt) {
 				config.saveConfiguration();
-				if (unsavedData && config.askForSaveOnClose) {
+				if (unsavedData && config.askForSaveOnClose()) {
 					if (JOptionPane.showConfirmDialog(evt.getComponent(),
 																						"Your current project is not saved.\nDo you want to save it before exiting?",
 																						"Project not saved",
@@ -406,11 +406,11 @@ public class SimeTimer extends JFrame {
 		
 		
 		
-		if (usedFile != null &&
-				usedFile.isFile() &&
-				config.loadLastSaveOnStartup) {
+		if (config.loadLastSaveOnStartup()
+				&& usedFile != null
+				&& usedFile.isFile()) {
 			// open last used project
-			SimeTimerProject temp = saveManager.loadProject(usedFile, config.fileFormat);
+			SimeTimerProject temp = saveManager.loadProject(usedFile, config.fileFormat());
 			if (temp != null) {
 				project = temp;
 				refreshTimeLabels();
@@ -554,7 +554,7 @@ public class SimeTimer extends JFrame {
 	
 	/**
 	 * generates a String for the time labels from a given time in milliseconds
-	 * @param timen the stopped time to be displayed, in milliseconds
+	 * @param time the stopped time to be displayed, in milliseconds
 	 * @return a {@link String} representing the stopped time in a readable format
 	 */
 	public static String timeToString(long time) {

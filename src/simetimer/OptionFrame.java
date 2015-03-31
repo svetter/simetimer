@@ -103,9 +103,9 @@ public class OptionFrame extends JFrame {
 		String[] checkBoxStrings = {"load last save on startup",
 																"show save prompt when loading a project",
 																"show save prompt when closing the window"};
-		boolean[] checkBoxStatus = {config.loadLastSaveOnStartup,
-																config.askForSaveOnLoad,
-																config.askForSaveOnClose};
+		boolean[] checkBoxStatus = {config.loadLastSaveOnStartup(),
+																config.askForSaveOnLoad(),
+																config.askForSaveOnClose()};
 		for (int i=0; i<saveLoadCheckboxes.length; i++) {
 			saveLoadCheckboxes[i].setBounds(FIRST_ITEM_COLUMN_OFFSET - 4,
 																			CHECKBOX_OFFSET[i],
@@ -131,7 +131,7 @@ public class OptionFrame extends JFrame {
 																 FOURTH_ITEM_ROW_SIZE);
 		fileFormatCombobox.setModel(new DefaultComboBoxModel<String>(new String[] {"Plain text", "Byte coded"}));
 		fileFormatCombobox.setFont(new Font("Dialog", Font.PLAIN, 12));
-		fileFormatCombobox.setSelectedIndex(config.fileFormat != SaveManager.FILE_FORMAT_BYTE ? 0 : 1);
+		fileFormatCombobox.setSelectedIndex(config.fileFormat() != SaveManager.FILE_FORMAT_BYTE ? 0 : 1);
 		cp.add(fileFormatCombobox);
 		
 		okButton.setBounds(FOURTH_ITEM_COLUMN_OFFSET,
@@ -175,6 +175,7 @@ public class OptionFrame extends JFrame {
 		});
 		
 		
+		// on window close with unsaved changes: ask user whether they want to save
 		addWindowListener(new WindowListener() {
 			@Override
 			public void windowActivated(WindowEvent evt) {}
@@ -204,17 +205,18 @@ public class OptionFrame extends JFrame {
 		});
 		
 		
+		// frame ready
 		setVisible(true);
 	}
 	
 	private boolean changesMade() {
-		return saveLoadCheckboxes[0].isSelected() ^ config.loadLastSaveOnStartup
-					 || saveLoadCheckboxes[1].isSelected() ^ config.askForSaveOnLoad
-					 || saveLoadCheckboxes[2].isSelected() ^ config.askForSaveOnClose
+		return saveLoadCheckboxes[0].isSelected() ^ config.loadLastSaveOnStartup()
+					 || saveLoadCheckboxes[1].isSelected() ^ config.askForSaveOnLoad()
+					 || saveLoadCheckboxes[2].isSelected() ^ config.askForSaveOnClose()
 					 || (fileFormatCombobox.getSelectedIndex() == 0
-					 		 && config.fileFormat == SaveManager.FILE_FORMAT_BYTE)
+					 		 && config.fileFormat() == SaveManager.FILE_FORMAT_BYTE)
 					 || (fileFormatCombobox.getSelectedIndex() == 1
-					 		 && config.fileFormat == SaveManager.FILE_FORMAT_PLAIN);
+					 		 && config.fileFormat() == SaveManager.FILE_FORMAT_PLAIN);
 	}
 	
 }

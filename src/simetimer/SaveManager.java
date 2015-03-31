@@ -18,7 +18,7 @@ import javax.swing.JOptionPane;
 
 /**
  * This class manages next to all of the I/O for the {@link SimeTimer}.
- * It saves and loads project files as well as app preferences
+ * It saves and loads project files as well as app options and preferences
  * and provides different file formats for the project files.
  * 
  * @author Simon Vetter
@@ -31,7 +31,7 @@ public class SaveManager {
 	 * Uses a plain text format and stores each {@link TimeChunk} in
 	 * one line, represented as start date (long) in milliseconds, followed by
 	 * a separator (constant) and the stopped time (long) in milliseconds.
-	 * The lines are separated with {@link System.lineSeparator()}s.
+	 * The lines are separated with {@link System}.lineSeparator()s.
 	 */
 	public static final int FILE_FORMAT_PLAIN = 0x504C4149;
 	/**
@@ -48,7 +48,7 @@ public class SaveManager {
 	public static final String SEPARATOR = "\t";
 	/**
 	 * Used to represent a nonexistent usedFile path in the method
-	 * {@link savePreferences(int, int, File)}.
+	 * {@link #saveConfig(boolean, boolean, boolean, int, int, int, File)}.
 	 * An empty file will be translated into this {@link String}.
 	 */
 	public static final String NULL_PATH = "*null*";
@@ -56,7 +56,7 @@ public class SaveManager {
 	/**
 	 * default path for the preferences file
 	 */
-	public static final String PREFERENCES_PATH = "SimeTimer.cfg";
+	public static final String CONFIG_PATH = "SimeTimer.cfg";
 	
 	// unified error messages
 	private static final String SAVE_ERROR = "Save error",
@@ -190,13 +190,13 @@ public class SaveManager {
 	
 	/**
 	 * loads a {@link SimeTimerProject} from the specified file.
-	 * Can only read files written by {@link saveProjectToPlainFile(SimeTimerProject, File)}.
+	 * Can only read files written by {@link #saveProjectToPlainFile(SimeTimerProject, File)}.
 	 * @param saveFile the {@link File} to load the {@link SimeTimerProject} from
 	 * @return a new {@link SimeTimerProject} with the data from the file
-	 * @throws FileNotFoundException
-	 * @throws NumberFormatException
-	 * @throws ArrayIndexOutOfBoundsException
-	 * @throws IOException
+	 * @throws FileNotFoundException when save file couldn't be found
+	 * @throws NumberFormatException when numbers could not be parsed
+	 * @throws ArrayIndexOutOfBoundsException when the file ended too soon
+	 * @throws IOException when an unknown error occured
 	 */
 	public SimeTimerProject loadProjectFromPlainFile(File saveFile) throws FileNotFoundException,
 																																				 NumberFormatException,
@@ -233,8 +233,8 @@ public class SaveManager {
 	 * Uses byte coded file format.
 	 * @param project the {@link SimeTimerProject} to save
 	 * @param saveFile the {@link File} to save the {@link SimeTimerProject} in
-	 * @throws FileNotFoundException
-	 * @throws IOException
+	 * @throws FileNotFoundException when the save file could not be found
+	 * @throws IOException when an unknown error occured
 	 */
 	public void saveProjectToByteFile(SimeTimerProject project, File saveFile) throws FileNotFoundException,
 																																										IOException {
@@ -251,11 +251,11 @@ public class SaveManager {
 	
 	/**
 	 * loads a {@link SimeTimerProject} from the specified file.
-	 * Can only read files written by {@link saveProjectToByteFile(SimeTimerProject, File)}.
+	 * Can only read files written by {@link #saveProjectToByteFile(SimeTimerProject, File)}.
 	 * @param saveFile the {@link File} to load the {@link SimeTimerProject} from
 	 * @return a new {@link SimeTimerProject} with the data from the file
-	 * @throws FileNotFoundException
-	 * @throws IOException
+	 * @throws FileNotFoundException when the save file could not be found
+	 * @throws IOException when an unknown error occured
 	 */
 	public SimeTimerProject loadProjectFromByteFile(File saveFile) throws FileNotFoundException,
 																																				IOException {
@@ -284,11 +284,14 @@ public class SaveManager {
 	/**
 	 * saves the given data into the default preferences file.
 	 * Handles Exceptions.
-	 * @param xPosition last x position of the {@link JFrame}
-	 * @param yPosition last y position of the {@link JFrame}
-	 * @param usedPath last used save/load path
+	 * @param loadLastSaveOnStartup loadLastSaveOnStartup
+	 * @param askForSaveOnLoad askForSaveOnLoad
+	 * @param askForSaveOnClose askForSaveOnClose
+	 * @param fileFormat fileFormat
+	 * @param xPosition xPosition
+	 * @param yPosition yPosition
+	 * @param usedFile usedFile
 	 */
-	// TODO update documentation
 	static void saveConfig(boolean loadLastSaveOnStartup,
 												 boolean askForSaveOnLoad,
 												 boolean askForSaveOnClose,
@@ -296,20 +299,8 @@ public class SaveManager {
 												 int xPosition,
 												 int yPosition,
 												 File usedFile) {
-		// check for positions too close to the screen edge
-		if (xPosition < 0) {
-			xPosition = 0;
-		} else if (xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH) {
-			xPosition = SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH;
-		}
-		if (yPosition < 0) {
-			yPosition = 0;
-		} else if (yPosition > SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT) {
-			yPosition = SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT;
-		}
-		// main work begins here
 		try {
-			DataOutputStream output = new DataOutputStream(new FileOutputStream(PREFERENCES_PATH));
+			DataOutputStream output = new DataOutputStream(new FileOutputStream(CONFIG_PATH));
 			// write data
 			// options:
 			output.writeBoolean(loadLastSaveOnStartup);
@@ -334,13 +325,15 @@ public class SaveManager {
 	}
 	
 	/**
-	 * loads preferenecs from the default preferences file
-	 * and feeds them back to the {@link SimeTimer} using the
-	 * setPreferences() method.
+	 * loads configuration data from the config file
+	 * and feeds them back to the {@link ConfigManager} using the
+	 * setOptions() and setPreferences() methods.
 	 * Handles Exceptions.
+	 * @param callback the {@link ConfigManager}'s identity to
+	 * 				feed the configuration data back to
+	 * @return true if loading went down without Exceptions, else false
 	 */
-	// TODO update documentation
-	static void loadAndSetConfig(ConfigManager callback) {
+	static boolean loadAndSetConfig(ConfigManager callback) {
 		// set default values
 		boolean loadLastSaveOnStartup = ConfigManager.DEFAULT_LOAD_LAST_SAVE_ON_STARTUP;
 		boolean askForSaveOnLoad = ConfigManager.DEFAULT_ASK_FOR_SAVE_ON_LOAD;
@@ -349,10 +342,12 @@ public class SaveManager {
 		int xPosition = ConfigManager.DEFAULT_X_POSITION;
 		int yPosition = ConfigManager.DEFAULT_Y_POSITION;
 		String usedPath = ConfigManager.DEFAULT_PATH;
+		// is returned, states if there were loading problems
+		boolean noProblems = true;
 		// begin IO work
 		DataInputStream input = null;
 		try {
-			input = new DataInputStream(new FileInputStream(PREFERENCES_PATH));
+			input = new DataInputStream(new FileInputStream(CONFIG_PATH));
 			// read data
 			// options:
 			loadLastSaveOnStartup = input.readBoolean();
@@ -369,9 +364,11 @@ public class SaveManager {
 		} catch (FileNotFoundException e) {
 			// preferences file couldn't be found
 			System.err.println(CONFIG_LOADING_FAILED + REASON_FILE_NOT_FOUND);
+			noProblems = false;
 		} catch (IOException e) {
 			// unknown error
 			System.err.println(CONFIG_LOADING_FAILED + REASON_UNKNOWN);
+			noProblems = false;
 		} finally {
 			// try to close file
 			try {
@@ -382,25 +379,10 @@ public class SaveManager {
 				// wasn't opened at all
 			}
 		}
-		// no Exceptions
-		// check validity
-		if (fileFormat != SaveManager.FILE_FORMAT_PLAIN
-				&& fileFormat != SaveManager.FILE_FORMAT_BYTE) {
-			// reset file format to default
-			fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
-		}
-		if (xPosition < 0
-				|| yPosition < 0
-				|| xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH
-				|| yPosition > SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT) {
-			// reset position on screen to default
-			xPosition = ConfigManager.DEFAULT_X_POSITION;
-			yPosition = ConfigManager.DEFAULT_Y_POSITION;
-		}
-		File usedFile = usedPath != null && !usedPath.equals(NULL_PATH) ? new File(usedPath) : null;
 		// feed back options and preferences
 		callback.setOptions(loadLastSaveOnStartup, askForSaveOnLoad, askForSaveOnClose, fileFormat);
-		callback.setPreferences(xPosition, yPosition, usedFile);
+		callback.setPreferences(xPosition, yPosition, usedPath);
+		return noProblems;
 	}
 	
 	
