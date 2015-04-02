@@ -20,13 +20,25 @@ public class ConfigManager {
 	private SimeTimer owner;
 	
 	
-	//DEFAULT OPTIONS AND PREFERENCES
+	// DEFAULT OPTIONS AND PREFERENCES
 	// Options
 	/**
 	 * default option for whether the SimeTimer automatically loads
 	 * the last used project (if available) when the app is started
 	 */
 	public static final boolean DEFAULT_LOAD_LAST_SAVE_ON_STARTUP = true;
+	/**
+	 * default option for whether the app shows a dialog which
+	 * asks the user to type in a comment for the last
+	 * {@link TimeChunk} when they press the stop button
+	 */
+	public static final boolean DEFAULT_ASK_FOR_COMMENT_ON_STOP = false;
+	/**
+	 * default option for whether the app shows a dialog which
+	 * asks the user to type in a comment for the last
+	 * {@link TimeChunk} when they press the cut button
+	 */
+	public static final boolean DEFAULT_ASK_FOR_COMMENT_ON_CUT = false;
 	/**
 	 * default option for whether the SimeTimer asks the user
 	 * if he wants to save when they attempt to load a project
@@ -37,7 +49,7 @@ public class ConfigManager {
 	 * default option for whether the SimeTimer asks the user if he
 	 * wants to save when they attempt to close an unsaved project
 	 */
-	public static final boolean DEFAULT_ASK_FOR_SAVE_ON_CLOSE = false;
+	public static final boolean DEFAULT_ASK_FOR_SAVE_ON_CLOSE = true;
 	/**
 	 * determines the file format that will be used
 	 * to save and load {@link SimeTimerProject}s
@@ -65,31 +77,41 @@ public class ConfigManager {
 	 * determines whether the application tries to load the last used file
 	 * (save or load) on startup
 	 */
-	private boolean loadLastSaveOnStartup;
+	boolean loadLastSaveOnStartup;
+	/**
+	 * determines whether the app shows a dialog which asks the user to type in
+	 * a comment for the last {@link TimeChunk} when they press the stop button
+	 */
+	boolean askForCommentOnStop;
+	/**
+	 * determines whether the app shows a dialog which asks the user to type in
+	 * a comment for the last {@link TimeChunk} when they press the cut button
+	 */
+	boolean askForCommentOnCut;
 	/**
 	 * determines whether the application asks the user if he wants to save
 	 * his current project first when the load button is pressed and
 	 * the current project contains unsaved data.
 	 */
-	private boolean askForSaveOnLoad;
+	boolean askForSaveOnLoad;
 	/**
 	 * determines whether the application asks the user if he wants to save
 	 * his current project first when the window is about to be closed and
 	 * the current project contains unsaved data.
 	 */
-	private boolean askForSaveOnClose;
+	boolean askForSaveOnClose;
 	/**
 	 * determines the file format used for saving and loading project files.
 	 * Can be {@link SaveManager}.FILE_FORMAT_PLAIN or
 	 * {@link SaveManager}.FILE_FORMAT_BYTE
 	 */
-	private int fileFormat;
+	int fileFormat;
 	// preferences
 	/**
 	 * the [@link File} that the user lastly used to save or load a project.
 	 * Canceled save or load operations do not count, but unsuccessful ones do.
 	 */
-	private File usedFile;
+	File usedFile;
 	// window position doesn't need to be stored
 	
 	
@@ -118,6 +140,8 @@ public class ConfigManager {
 	 */
 	public void setDefaults() {
 		loadLastSaveOnStartup = DEFAULT_LOAD_LAST_SAVE_ON_STARTUP;
+		askForCommentOnStop = DEFAULT_ASK_FOR_COMMENT_ON_STOP;
+		askForCommentOnCut = DEFAULT_ASK_FOR_COMMENT_ON_CUT;
 		askForSaveOnLoad = DEFAULT_ASK_FOR_SAVE_ON_LOAD;
 		askForSaveOnClose = DEFAULT_ASK_FOR_SAVE_ON_CLOSE;
 		fileFormat = DEFAULT_FILE_FORMAT;
@@ -147,6 +171,8 @@ public class ConfigManager {
 		}
 		// save data into file
 		SaveManager.saveConfig(loadLastSaveOnStartup,
+													 askForCommentOnStop,
+													 askForCommentOnCut,
 													 askForSaveOnLoad,
 													 askForSaveOnClose,
 													 fileFormat,
@@ -159,11 +185,15 @@ public class ConfigManager {
 	 * Validates and applies the given options.
 	 * All values are stored in the object variables with the same names.
 	 * @param loadLastSaveOnStartup loadLastSaveOnStartup
+	 * @param askForCommentOnStop askForCommentOnStop
+	 * @param askForCommentOnCut askForCommentOnCut
 	 * @param askForSaveOnLoad askForSaveOnLoad
 	 * @param askForSaveOnClose askForSaveOnClose
 	 * @param fileFormat fileFormat
 	 */
 	void setOptions(boolean loadLastSaveOnStartup,
+									boolean askForCommentOnStop,
+									boolean askForCommentOnCut,
 									boolean askForSaveOnLoad,
 									boolean askForSaveOnClose,
 									int fileFormat) {
@@ -175,6 +205,8 @@ public class ConfigManager {
 		}
 		// set values
 		this.loadLastSaveOnStartup = loadLastSaveOnStartup;
+		this.askForCommentOnStop = askForCommentOnStop;
+		this.askForCommentOnCut = askForCommentOnCut;
 		this.askForSaveOnLoad = askForSaveOnLoad;
 		this.askForSaveOnClose = askForSaveOnClose;
 		this.fileFormat = fileFormat;
@@ -206,56 +238,5 @@ public class ConfigManager {
 		// store usedFile
 		this.usedFile = usedFile;
 	}
-	
-	
-	
-	
-	// GETTER
-	// Options
-	/**
-	 * determines whether the application tries to load the last used file
-	 * (save or load) on startup
-	 * @return a boolean with the current configuration state
-	 */
-	public boolean loadLastSaveOnStartup() {
-		return loadLastSaveOnStartup;
-	}
-	/**
-	 * determines whether the application asks the user if he wants to save
-	 * his current project first when the load button is pressed and
-	 * the current project contains unsaved data.
-	 * @return a boolean with the current configuration state
-	 */
-	public boolean askForSaveOnLoad() {
-		return askForSaveOnLoad;
-	}
-	/**
-	 * determines whether the application asks the user if he wants to save
-	 * his current project first when the window is about to be closed and
-	 * the current project contains unsaved data.
-	 * @return a boolean with the current configuration state
-	 */
-	public boolean askForSaveOnClose() {
-		return askForSaveOnClose;
-	}
-	/**
-	 * determines the file format used for saving and loading project files.
-	 * Can be {@link SaveManager}.FILE_FORMAT_PLAIN or
-	 * {@link SaveManager}.FILE_FORMAT_BYTE
-	 * @return an int with the current configuration state
-	 */
-	public int fileFormat() {
-		return fileFormat;
-	}
-	// Preferences
-	/**
-	 * the [@link File} that the user lastly used to save or load a project.
-	 * Canceled save or load operations do not count, but unsuccessful ones do.
-	 * @return a File with the current configuration state
-	 */
-	public File usedFile() {
-		return usedFile;
-	}
-	
 	
 }

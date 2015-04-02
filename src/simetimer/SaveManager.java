@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 
@@ -48,7 +47,7 @@ public class SaveManager {
 	public static final String SEPARATOR = "\t";
 	/**
 	 * Used to represent a nonexistent usedFile path in the method
-	 * {@link #saveConfig(boolean, boolean, boolean, int, int, int, File)}.
+	 * {@link #saveConfig(boolean, boolean, boolean, boolean, boolean, int, int, int, File)}.
 	 * An empty file will be translated into this {@link String}.
 	 */
 	public static final String NULL_PATH = "*null*";
@@ -71,18 +70,6 @@ public class SaveManager {
 															REASON_UNKNOWN = "An unknown error occured.";
 	
 	
-	/**
-	 * the parent {@link JFrame} for save/load dialogs
-	 */
-	private final SimeTimer owner;
-
-	/**
-	 * constructor stores owner {@link JFrame}
-	 * @param owner the parent {@link JFrame} for save/load dialogs
-	 */
-	public SaveManager(SimeTimer owner) {
-		this.owner = owner;
-	}
 	
 	
 	
@@ -93,11 +80,16 @@ public class SaveManager {
 	 * using the given file format. Delegates the main work to a submethod
 	 * for each file format.
 	 * Handles Exceptions.
+	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
+	 * 				be associated
 	 * @param project the {@link SimeTimerProject} to save
 	 * @param saveFile saveFile the {@link File} to save the {@link SimeTimerProject} in
 	 * @param fileFormat an int constant to represent the file format to use
 	 */
-	public void saveProject(SimeTimerProject project, File saveFile, int fileFormat) {
+	public static void saveProject(SimeTimer owner,
+																 SimeTimerProject project,
+																 File saveFile,
+																 int fileFormat) {
 		try {
 			if (fileFormat == FILE_FORMAT_PLAIN) {
 				saveProjectToPlainFile(project, saveFile);
@@ -126,11 +118,15 @@ public class SaveManager {
 	 * given file format. Delegates the main work to a submethod
 	 * for each file format.
 	 * Handles Exceptions.
+	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
+	 * 				be associated
 	 * @param saveFile saveFile the {@link File} to load the {@link SimeTimerProject} from
 	 * @param fileFormat an int constant to represent the file format to use
 	 * @return a new {@link SimeTimerProject} with the data from the file
 	 */
-	public SimeTimerProject loadProject(File saveFile, int fileFormat) {
+	public static SimeTimerProject loadProject(SimeTimer owner,
+																						 File saveFile,
+																						 int fileFormat) {
 		try {
 			if (fileFormat == FILE_FORMAT_PLAIN) {
 				return loadProjectFromPlainFile(saveFile);
@@ -175,15 +171,20 @@ public class SaveManager {
 	 * @param saveFile the {@link File} to save the {@link SimeTimerProject} in
 	 * @throws IOException when unknown IOExceptions occur
 	 */
-	public void saveProjectToPlainFile(SimeTimerProject project, File saveFile) throws IOException {
+	public static void saveProjectToPlainFile(SimeTimerProject project,
+																						File saveFile) throws IOException {
 		BufferedWriter output;
 		output = new BufferedWriter(new FileWriter(saveFile));
 		output.write("");
 		for (int i=0; i<project.size(); i++) {
-			output.write(Long.toString(project.getTimeChunkAt(i).getStartDate().getTime()) +
-									 SEPARATOR +
-									 Long.toString(project.getTimeChunkAt(i).getStoppedTime()) +
-									 System.lineSeparator());
+			output.write(Integer.toString(i)
+									 + SEPARATOR
+									 + Long.toString(project.getTimeChunk(i).getStartDate().getTime())
+									 + SEPARATOR
+									 + Long.toString(project.getTimeChunk(i).getStoppedTime())
+									 + SEPARATOR
+									 + project.getTimeChunk(i).getComment()
+									 + System.lineSeparator());
 		}
 		output.close();
 	}
@@ -198,10 +199,10 @@ public class SaveManager {
 	 * @throws ArrayIndexOutOfBoundsException when the file ended too soon
 	 * @throws IOException when an unknown error occured
 	 */
-	public SimeTimerProject loadProjectFromPlainFile(File saveFile) throws FileNotFoundException,
-																																				 NumberFormatException,
-																																				 ArrayIndexOutOfBoundsException,
-																																				 IOException {
+	public static SimeTimerProject loadProjectFromPlainFile(File saveFile) throws FileNotFoundException,
+																																								NumberFormatException,
+																																								ArrayIndexOutOfBoundsException,
+																																								IOException {
 		SimeTimerProject result = new SimeTimerProject();
 		BufferedReader input = null;
 		input = new BufferedReader(new FileReader(saveFile));
@@ -209,8 +210,9 @@ public class SaveManager {
 		String[] splitted;
 		while (line != null && !line.isEmpty()) {
 			splitted = line.split(SEPARATOR);
-			result.addTimeChunk(new TimeChunk(Long.parseLong(splitted[0]),
-					 															Long.parseLong(splitted[1])));
+			result.addTimeChunk(new TimeChunk(Long.parseLong(splitted[1]),
+					 															Long.parseLong(splitted[2]),
+					 															splitted[3]));
 			line = input.readLine();
 		}
 		// try to close file
@@ -236,15 +238,16 @@ public class SaveManager {
 	 * @throws FileNotFoundException when the save file could not be found
 	 * @throws IOException when an unknown error occured
 	 */
-	public void saveProjectToByteFile(SimeTimerProject project, File saveFile) throws FileNotFoundException,
-																																										IOException {
+	public static void saveProjectToByteFile(SimeTimerProject project,
+																					 File saveFile) throws FileNotFoundException,
+																					 											 IOException {
 		DataOutputStream output = new DataOutputStream(new FileOutputStream(saveFile));
 		// for every TimeChunk:
 		for (int i=0; i<project.size(); i++) {
 			// write startDate as long
-			output.writeLong(project.getTimeChunkAt(i).getStartDate().getTime());
+			output.writeLong(project.getTimeChunk(i).getStartDate().getTime());
 			// write stoppedTime
-			output.writeLong(project.getTimeChunkAt(i).getStoppedTime());
+			output.writeLong(project.getTimeChunk(i).getStoppedTime());
 		}
 		output.close();
 	}
@@ -257,8 +260,8 @@ public class SaveManager {
 	 * @throws FileNotFoundException when the save file could not be found
 	 * @throws IOException when an unknown error occured
 	 */
-	public SimeTimerProject loadProjectFromByteFile(File saveFile) throws FileNotFoundException,
-																																				IOException {
+	public static SimeTimerProject loadProjectFromByteFile(File saveFile) throws FileNotFoundException,
+																																							 IOException {
 		SimeTimerProject result = new SimeTimerProject();
 		DataInputStream input = null;
 		input = new DataInputStream(new FileInputStream(saveFile));
@@ -285,6 +288,8 @@ public class SaveManager {
 	 * saves the given data into the default preferences file.
 	 * Handles Exceptions.
 	 * @param loadLastSaveOnStartup loadLastSaveOnStartup
+	 * @param askForCommentOnStop askForCommentOnStop
+	 * @param askForCommentOnCut askForCommentOnCut
 	 * @param askForSaveOnLoad askForSaveOnLoad
 	 * @param askForSaveOnClose askForSaveOnClose
 	 * @param fileFormat fileFormat
@@ -293,6 +298,8 @@ public class SaveManager {
 	 * @param usedFile usedFile
 	 */
 	static void saveConfig(boolean loadLastSaveOnStartup,
+												 boolean askForCommentOnStop,
+												 boolean askForCommentOnCut,
 												 boolean askForSaveOnLoad,
 												 boolean askForSaveOnClose,
 												 int fileFormat,
@@ -304,6 +311,8 @@ public class SaveManager {
 			// write data
 			// options:
 			output.writeBoolean(loadLastSaveOnStartup);
+			output.writeBoolean(askForCommentOnStop);
+			output.writeBoolean(askForCommentOnCut);
 			output.writeBoolean(askForSaveOnLoad);
 			output.writeBoolean(askForSaveOnClose);
 			output.writeInt(fileFormat);
@@ -336,6 +345,8 @@ public class SaveManager {
 	static boolean loadAndSetConfig(ConfigManager callback) {
 		// set default values
 		boolean loadLastSaveOnStartup = ConfigManager.DEFAULT_LOAD_LAST_SAVE_ON_STARTUP;
+		boolean askForCommentOnStop = ConfigManager.DEFAULT_ASK_FOR_COMMENT_ON_STOP;
+		boolean askForCommentOnCut = ConfigManager.DEFAULT_ASK_FOR_COMMENT_ON_CUT;
 		boolean askForSaveOnLoad = ConfigManager.DEFAULT_ASK_FOR_SAVE_ON_LOAD;
 		boolean askForSaveOnClose = ConfigManager.DEFAULT_ASK_FOR_SAVE_ON_CLOSE;
 		int fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
@@ -351,6 +362,8 @@ public class SaveManager {
 			// read data
 			// options:
 			loadLastSaveOnStartup = input.readBoolean();
+			askForCommentOnStop = input.readBoolean();
+			askForCommentOnCut = input.readBoolean();
 			askForSaveOnLoad = input.readBoolean();
 			askForSaveOnClose = input.readBoolean();
 			fileFormat = input.readInt();
@@ -380,8 +393,15 @@ public class SaveManager {
 			}
 		}
 		// feed back options and preferences
-		callback.setOptions(loadLastSaveOnStartup, askForSaveOnLoad, askForSaveOnClose, fileFormat);
-		callback.setPreferences(xPosition, yPosition, usedPath);
+		callback.setOptions(loadLastSaveOnStartup,
+												askForCommentOnStop,
+												askForCommentOnCut,
+												askForSaveOnLoad,
+												askForSaveOnClose,
+												fileFormat);
+		callback.setPreferences(xPosition,
+														yPosition,
+														usedPath);
 		return noProblems;
 	}
 	
@@ -392,10 +412,14 @@ public class SaveManager {
 	/**
 	 * saves the given String into the given File.
 	 * Handles Exceptions.
+	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
+	 * 				be associated
 	 * @param data the String to save into the given File
 	 * @param saveFile the File to save the given String into
 	 */
-	public void saveToPlainFile(String data, File saveFile) {
+	public static void saveToPlainFile(SimeTimer owner,
+																		 String data,
+																		 File saveFile) {
 		BufferedWriter output;
 		try {
 			output = new BufferedWriter(new FileWriter(saveFile));
@@ -414,10 +438,13 @@ public class SaveManager {
 	 * loads the first line from the given File, parses it to a long
 	 * and returns it.
 	 * Handles Exceptions.
+	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
+	 * 				be associated
 	 * @param saveFile the File to load from
 	 * @return a long parsed from the File's first line or -1L on errors
 	 */
-	public long loadFromPlainFile(File saveFile) {
+	public static long loadFromPlainFile(SimeTimer owner,
+																			 File saveFile) {
 		BufferedReader input = null;
 		long data;
 		try {

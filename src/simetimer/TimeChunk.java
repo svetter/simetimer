@@ -10,7 +10,7 @@ import java.util.Date;
  * start button and the press of its stop button.
  * Stores the elapsed time in a long (in milliseconds), plus
  * a {@link Date} instance from both the beginning and the end
- * of the measurement.
+ * of the measurement, plus an optional comment.
  * 
  * @author Simon Vetter
  *
@@ -24,6 +24,7 @@ public class TimeChunk {
 	
 	private Date startDate;
 	private long stoppedTime;
+	private String comment;
 	
 	
 	
@@ -31,10 +32,29 @@ public class TimeChunk {
 	 * creates new TimeChunk from given arguments
 	 * @param startDate a {@link Date} instance from the start of the measurement
 	 * @param stoppedTime the total length of the TimeChunk, in milliseconds
+	 * @param comment the comment to be associated with the TimeChunk
 	 */
-	public TimeChunk(Date startDate, long stoppedTime) {
+	public TimeChunk(Date startDate, long stoppedTime, String comment) {
 		this.stoppedTime = stoppedTime;
 		this.startDate = startDate;
+		this.comment = comment;
+	}
+	/**
+	 * creates new TimeChunk from given arguments
+	 * @param startDate a {@link Date} instance from the start of the measurement
+	 * @param stoppedTime the total length of the TimeChunk, in milliseconds
+	 */
+	public TimeChunk(Date startDate, long stoppedTime) {
+		this(startDate, stoppedTime, "");
+	}
+	/**
+	 * creates new TimeChunk from given arguments
+	 * @param startDateMillis the start date represented in milliseconds
+	 * @param stoppedTime the total length of the TimeChunk, in milliseconds
+	 * @param comment the comment to be associated with the TimeChunk
+	 */
+	public TimeChunk(long startDateMillis, long stoppedTime, String comment) {
+		this(new Date(startDateMillis), stoppedTime, comment);
 	}
 	/**
 	 * creates new TimeChunk from given arguments
@@ -47,21 +67,13 @@ public class TimeChunk {
 	/**
 	 * creates a TimeChunk that runs from the given start date
 	 * unto the moment this constructor is called
-	 * @param startDateMillis the start time of the measuremtent
+	 * @param startTimeMillis the start time of the measuremtent
 	 * 				represented in milliseconds
 	 */
-	public TimeChunk(long startDateMillis) {
-		this(new Date(), System.currentTimeMillis() - startDateMillis);
+	public TimeChunk(long startTimeMillis) {
+		this(startTimeMillis, System.currentTimeMillis() - startTimeMillis);
 	}
 	
-	
-	/**
-	 * get the total length of the TimeChunk
-	 * @return the total length of the TimeChunk, in milliseconds
-	 */
-	public long getStoppedTime() {
-		return stoppedTime;
-	}
 	
 	/**
 	 * get the {@link Date} instance from the start of the measurement
@@ -70,13 +82,37 @@ public class TimeChunk {
 	public Date getStartDate() {
 		return startDate;
 	}
-	
+	/**
+	 * get the total length of the TimeChunk
+	 * @return the total length of the TimeChunk, in milliseconds
+	 */
+	public long getStoppedTime() {
+		return stoppedTime;
+	}
+	/**
+	 * get the comment associated with this TimeChunk
+	 * @return the associated comment as a String
+	 */
+	public String getComment() {
+		return comment;
+	}
 	/**
 	 * get the {@link Date} instance from the end of the measurement
 	 * @return the {@link Date} instance from the end of the measurement
 	 */
 	public Date getEndDate() {
 		return new Date(startDate.getTime() + stoppedTime);
+	}
+	
+	/**
+	 * sets the TimeChunk's comment
+	 * @param comment the comment to be associated with the TimeChunk
+	 */
+	public void setComment(String comment) {
+		if (comment == null) {
+			throw new IllegalArgumentException("argument comment must not be null");
+		}
+		this.comment = comment;
 	}
 	
 	/**

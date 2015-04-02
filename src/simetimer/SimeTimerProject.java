@@ -31,8 +31,7 @@ public class SimeTimerProject {
 	 * @param index the index of the desired {@link TimeChunk}
 	 * @return the {@link TimeChunk} stored at the given index
 	 */
-	public TimeChunk getTimeChunkAt(int index) {
-		sortTimes();
+	public TimeChunk getTimeChunk(int index) {
 		return timeChunks.get(index);
 	}
 	
@@ -89,7 +88,8 @@ public class SimeTimerProject {
 	public String[] getStringArray(int chunkIndex) {
 		return new String[] {Integer.toString(chunkIndex + 1),
 												 TimeChunk.dateToString(timeChunks.get(chunkIndex).getStartDate()),
-												 TimeChunk.timeToString(timeChunks.get(chunkIndex).getStoppedTime())};
+												 TimeChunk.timeToString(timeChunks.get(chunkIndex).getStoppedTime()),
+												 timeChunks.get(chunkIndex).getComment()};
 	}
 	
 	/**
