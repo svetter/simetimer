@@ -172,7 +172,6 @@ public class SimeTimer extends JFrame {
 		setIconImage(
 				Toolkit.getDefaultToolkit().getImage(
 						getClass().getClassLoader().getResource("simetimer/simetimer.png")));
-
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setResizable(false);
@@ -349,9 +348,12 @@ public class SimeTimer extends JFrame {
 				int option = fileChooser.showSaveDialog(owner);
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved save
-					SaveManager.saveProject(THIS, project, fileChooser.getSelectedFile(), config.fileFormat);
-					unsavedData = false;
 					config.usedFile = fileChooser.getSelectedFile();
+					if (!config.usedFile.getName().contains(".")) {
+						config.usedFile = new File(config.usedFile.getPath().concat(".stp"));
+					}
+					SaveManager.saveProject(THIS, project, config.usedFile, config.fileFormat);
+					unsavedData = false;
 				}
 			}
 		};
@@ -726,7 +728,7 @@ public class SimeTimer extends JFrame {
 		 * triggers display of a {@link JFileChooser} and saves if user approved
 		 */
 		public void actionPerformed(ActionEvent evt) {
-			fileChooser = new JFileChooser(config.usedFile);
+			fileChooser = new JFileChooser(config.usedFile.getParentFile());
 			fileChooser.setMinimumSize(new Dimension(350, 300));
 			// only display directories and .stp files
 			// (and files without an extension)

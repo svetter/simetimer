@@ -209,7 +209,7 @@ public class SaveManager {
 		String line = input.readLine();
 		String[] splitted;
 		while (line != null && !line.isEmpty()) {
-			splitted = line.split(SEPARATOR);
+			splitted = line.split(SEPARATOR, -1);
 			result.addTimeChunk(new TimeChunk(Long.parseLong(splitted[1]),
 					 															Long.parseLong(splitted[2]),
 					 															splitted[3]));
@@ -248,6 +248,8 @@ public class SaveManager {
 			output.writeLong(project.getTimeChunk(i).getStartDate().getTime());
 			// write stoppedTime
 			output.writeLong(project.getTimeChunk(i).getStoppedTime());
+			// write comment
+			output.writeUTF(project.getTimeChunk(i).getComment());
 		}
 		output.close();
 	}
@@ -267,7 +269,8 @@ public class SaveManager {
 		input = new DataInputStream(new FileInputStream(saveFile));
 		while (input.available() >= 2 * Long.BYTES) {
 			result.addTimeChunk(new TimeChunk(input.readLong(),
-																				input.readLong()));
+																				input.readLong(),
+																				input.readUTF()));
 		}
 		// try to close file
 		try {
