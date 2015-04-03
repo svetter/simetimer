@@ -298,7 +298,7 @@ public class SimeTimer extends JFrame {
 					tableModel.addRow(project.getStringArray(project.size()-1));
 					scrollDown();
 					// new unsaved data
-					unsavedData = true;
+					changeMade();
 				}
 			}
 		});
@@ -329,6 +329,8 @@ public class SimeTimer extends JFrame {
 				updateProjectTime();
 				tableModel.addRow(project.getStringArray(project.size()-1));
 				scrollDown();
+				// new unsaved data
+				changeMade();
 			}
 		});
 		
@@ -490,6 +492,7 @@ public class SimeTimer extends JFrame {
 			project = new SimeTimerProject();
 			refreshTimeLabels();
 			refreshTable();
+			unsavedData = false;
 		}
 	}
 	
@@ -571,7 +574,7 @@ public class SimeTimer extends JFrame {
 					project.getTimeChunk(i).setComment((String) tableModel.getValueAt(i, 3));
 					// if new value is not equal to the old one, there is new unsaved data
 					if (!temp.equals(project.getTimeChunk(i).getComment())) {
-						unsavedData = true;
+						changeMade();
 					}
 				}
 			}
@@ -610,33 +613,13 @@ public class SimeTimer extends JFrame {
 		tableScrollPane.getVerticalScrollBar().setValue(tableScrollPane.getVerticalScrollBar().getMaximum());
 	}
 	
-	/**
-	 * generates a String for the time labels from a given time in milliseconds
-	 * @param time the stopped time to be displayed, in milliseconds
-	 * @return a {@link String} representing the stopped time in a readable format
-	 */
-	public static String timeToString(long time) {
-		int millis = (int) (time % 1000);
-		time -= millis;
-		time /= 1000;
-		int seconds = (int) (time % 60);
-		time -= seconds;
-		time /= 60;
-		int minutes = (int) (time % 60);
-		time -= minutes;
-		time /= 60;
-		int hours = (int) time;
-		StringBuilder result = new StringBuilder();
-		result
-				.append(hours)
-				.append(":")
-				.append(Integer.toString(minutes).length() == 2 ? minutes : "0" + minutes)
-				.append(":")
-				.append(Integer.toString(seconds).length() == 2 ? seconds : "0" + seconds)
-				.append(".")
-				.append(Integer.toString(millis).length() == 3 ? millis :
-								Integer.toString(millis).length() == 2 ? "0" + millis : "00" + millis);
-		return result.toString();
+	private void changeMade() {
+		if (config.autosave) {
+			// try to save data
+			unsavedData = !SaveManager.saveProject(this, project, config.usedFile, config.fileFormat);
+		} else {
+			unsavedData = true;
+		}
 	}
 	
 	/**
@@ -685,6 +668,35 @@ public class SimeTimer extends JFrame {
 			// stop timer
 			displayTimer.cancel();
 		}
+	}
+	
+	/**
+	 * generates a String for the time labels from a given time in milliseconds
+	 * @param time the stopped time to be displayed, in milliseconds
+	 * @return a {@link String} representing the stopped time in a readable format
+	 */
+	public static String timeToString(long time) {
+		int millis = (int) (time % 1000);
+		time -= millis;
+		time /= 1000;
+		int seconds = (int) (time % 60);
+		time -= seconds;
+		time /= 60;
+		int minutes = (int) (time % 60);
+		time -= minutes;
+		time /= 60;
+		int hours = (int) time;
+		StringBuilder result = new StringBuilder();
+		result
+				.append(hours)
+				.append(":")
+				.append(Integer.toString(minutes).length() == 2 ? minutes : "0" + minutes)
+				.append(":")
+				.append(Integer.toString(seconds).length() == 2 ? seconds : "0" + seconds)
+				.append(".")
+				.append(Integer.toString(millis).length() == 3 ? millis :
+								Integer.toString(millis).length() == 2 ? "0" + millis : "00" + millis);
+		return result.toString();
 	}
 	
 	

@@ -23,10 +23,15 @@ public class ConfigManager {
 	// DEFAULT OPTIONS AND PREFERENCES
 	// Options
 	/**
-	 * default option for whether the SimeTimer automatically loads
+	 * default option for whether the app automatically loads
 	 * the last used project (if available) when the app is started
 	 */
 	public static final boolean DEFAULT_LOAD_LAST_SAVE_ON_STARTUP = true;
+	/**
+	 * default option for whether the app automatically saves all changes
+	 * to the last used {@link File} immediately
+	 */
+	public static final boolean DEFAULT_AUTOSAVE = false; 
 	/**
 	 * default option for whether the app shows a dialog which
 	 * asks the user to type in a comment for the last
@@ -50,6 +55,15 @@ public class ConfigManager {
 	 * wants to save when they attempt to close an unsaved project
 	 */
 	public static final boolean DEFAULT_ASK_FOR_SAVE_ON_CLOSE = true;
+	/**
+	 * array representation of all the boolean default option properties
+	 */
+	public static final boolean[] DEFAULT_BOOL_OPTIONS = {DEFAULT_LOAD_LAST_SAVE_ON_STARTUP,
+																												DEFAULT_AUTOSAVE,
+																												DEFAULT_ASK_FOR_COMMENT_ON_STOP,
+																												DEFAULT_ASK_FOR_COMMENT_ON_CUT,
+																												DEFAULT_ASK_FOR_SAVE_ON_LOAD,
+																												DEFAULT_ASK_FOR_SAVE_ON_CLOSE};
 	/**
 	 * determines the file format that will be used
 	 * to save and load {@link SimeTimerProject}s
@@ -79,6 +93,11 @@ public class ConfigManager {
 	 */
 	boolean loadLastSaveOnStartup;
 	/**
+	 * determines whether the app automatically saves all changes
+	 * to the last used {@link File} immediately
+	 */
+	boolean autosave;
+	/**
 	 * determines whether the app shows a dialog which asks the user to type in
 	 * a comment for the last {@link TimeChunk} when they press the stop button
 	 */
@@ -100,6 +119,31 @@ public class ConfigManager {
 	 * the current project contains unsaved data.
 	 */
 	boolean askForSaveOnClose;
+	/**
+	 * returns an array representation of all the boolean option properties
+	 * @return an array representation of all the boolean option properties
+	 */
+	boolean[] boolOptions() {
+		return new boolean[] {loadLastSaveOnStartup,
+													autosave,
+													askForCommentOnStop,
+													askForCommentOnCut,
+													askForSaveOnLoad,
+													askForSaveOnClose};
+	}
+	/**
+	 * sets all the boolean options properties
+	 * @param boolOptions an array representation of
+	 * 										all the boolean option properties
+	 */
+	void setBoolOptions(boolean[] boolOptions) {
+		this.loadLastSaveOnStartup = boolOptions[0];
+		this.autosave = boolOptions[1];
+		this.askForCommentOnStop = boolOptions[2];
+		this.askForCommentOnCut = boolOptions[3];
+		this.askForSaveOnLoad = boolOptions[4];
+		this.askForSaveOnClose = boolOptions[5];
+	}
 	/**
 	 * determines the file format used for saving and loading project files.
 	 * Can be {@link SaveManager}.FILE_FORMAT_PLAIN or
@@ -140,10 +184,12 @@ public class ConfigManager {
 	 */
 	public void setDefaults() {
 		loadLastSaveOnStartup = DEFAULT_LOAD_LAST_SAVE_ON_STARTUP;
+		autosave = DEFAULT_AUTOSAVE;
 		askForCommentOnStop = DEFAULT_ASK_FOR_COMMENT_ON_STOP;
 		askForCommentOnCut = DEFAULT_ASK_FOR_COMMENT_ON_CUT;
 		askForSaveOnLoad = DEFAULT_ASK_FOR_SAVE_ON_LOAD;
 		askForSaveOnClose = DEFAULT_ASK_FOR_SAVE_ON_CLOSE;
+		setBoolOptions(DEFAULT_BOOL_OPTIONS);
 		fileFormat = DEFAULT_FILE_FORMAT;
 		usedFile = DEFAULT_PATH != null ? new File(DEFAULT_PATH) : null;
 	}
@@ -170,11 +216,7 @@ public class ConfigManager {
 			yPosition = SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT;
 		}
 		// save data into file
-		SaveManager.saveConfig(loadLastSaveOnStartup,
-													 askForCommentOnStop,
-													 askForCommentOnCut,
-													 askForSaveOnLoad,
-													 askForSaveOnClose,
+		SaveManager.saveConfig(boolOptions(),
 													 fileFormat,
 													 xPosition,
 													 yPosition,
@@ -184,18 +226,10 @@ public class ConfigManager {
 	/**
 	 * Validates and applies the given options.
 	 * All values are stored in the object variables with the same names.
-	 * @param loadLastSaveOnStartup loadLastSaveOnStartup
-	 * @param askForCommentOnStop askForCommentOnStop
-	 * @param askForCommentOnCut askForCommentOnCut
-	 * @param askForSaveOnLoad askForSaveOnLoad
-	 * @param askForSaveOnClose askForSaveOnClose
+	 * @param boolOptions an array representation of all the boolean option properties
 	 * @param fileFormat fileFormat
 	 */
-	void setOptions(boolean loadLastSaveOnStartup,
-									boolean askForCommentOnStop,
-									boolean askForCommentOnCut,
-									boolean askForSaveOnLoad,
-									boolean askForSaveOnClose,
+	void setOptions(boolean[] boolOptions,
 									int fileFormat) {
 		// check validity
 		if (fileFormat != SaveManager.FILE_FORMAT_PLAIN
@@ -204,11 +238,7 @@ public class ConfigManager {
 			fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
 		}
 		// set values
-		this.loadLastSaveOnStartup = loadLastSaveOnStartup;
-		this.askForCommentOnStop = askForCommentOnStop;
-		this.askForCommentOnCut = askForCommentOnCut;
-		this.askForSaveOnLoad = askForSaveOnLoad;
-		this.askForSaveOnClose = askForSaveOnClose;
+		setBoolOptions(boolOptions);
 		this.fileFormat = fileFormat;
 	}
 	

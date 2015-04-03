@@ -25,7 +25,7 @@ public class OptionFrame extends JFrame {
 	private static final int DEFAULT_GAP = 10,
 													 NO_GAP = 0,
 													 BIG_GAP = 20;
-	private static final int CHECKBOX_COUNT = 5,
+	private static final int CHECKBOX_COUNT = ConfigManager.DEFAULT_BOOL_OPTIONS.length,
 													 VERTICAL_CHECKBOX_SIZE = 20,
 													 VERTICAL_CHECKBOX_GAP = NO_GAP;
 	private static final int CHECKBOX_ROW_SIZE = VERTICAL_CHECKBOX_SIZE * CHECKBOX_COUNT
@@ -104,11 +104,13 @@ public class OptionFrame extends JFrame {
 		// setting layout
 		
 		String[] checkBoxStrings = {"load last save on startup",
+																"autosave all changes",
 																"show comment prompt when pressing stop",
 																"show comment prompt when pressing cut",
 																"show save prompt when loading a project",
 																"show save prompt when closing the window"};
 		boolean[] checkBoxStatus = {config.loadLastSaveOnStartup,
+																config.autosave,
 																config.askForCommentOnStop,
 																config.askForCommentOnCut,
 																config.askForSaveOnLoad,
@@ -166,11 +168,11 @@ public class OptionFrame extends JFrame {
 		okButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				config.setOptions(checkboxes[0].isSelected(),
-													checkboxes[1].isSelected(),
-													checkboxes[2].isSelected(),
-													checkboxes[3].isSelected(),
-													checkboxes[4].isSelected(),
+				boolean[] boolOptions = new boolean[CHECKBOX_COUNT];
+				for (int i=0; i<CHECKBOX_COUNT; i++) {
+					boolOptions[i] = checkboxes[i].isSelected();
+				}
+				config.setOptions(boolOptions,
 													fileFormatCombobox.getSelectedIndex() != 1
 														? SaveManager.FILE_FORMAT_PLAIN
 														: SaveManager.FILE_FORMAT_BYTE);
@@ -228,11 +230,11 @@ public class OptionFrame extends JFrame {
 	 * @return true if effective changes have been made, else false 
 	 */
 	private boolean changesMade() {
-		return checkboxes[0].isSelected() ^ config.loadLastSaveOnStartup
-					 || checkboxes[1].isSelected() ^ config.askForCommentOnStop
-					 || checkboxes[2].isSelected() ^ config.askForCommentOnCut
-					 || checkboxes[3].isSelected() ^ config.askForSaveOnLoad
-					 || checkboxes[4].isSelected() ^ config.askForSaveOnClose
+		boolean boolsChanged = false;
+		for (int i = 0; i < CHECKBOX_COUNT; i++) {
+			boolsChanged |= checkboxes[i].isSelected() ^ /* != */ config.boolOptions()[i];
+		}
+		return boolsChanged
 					 || (fileFormatCombobox.getSelectedIndex() == 0
 					 		 && config.fileFormat == SaveManager.FILE_FORMAT_BYTE)
 					 || (fileFormatCombobox.getSelectedIndex() == 1

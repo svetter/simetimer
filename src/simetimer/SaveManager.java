@@ -47,7 +47,7 @@ public class SaveManager {
 	public static final String SEPARATOR = "\t";
 	/**
 	 * Used to represent a nonexistent usedFile path in the method
-	 * {@link #saveConfig(boolean, boolean, boolean, boolean, boolean, int, int, int, File)}.
+	 * {@link #saveConfig(boolean[], int, int, int, File)}.
 	 * An empty file will be translated into this {@link String}.
 	 */
 	public static final String NULL_PATH = "*null*";
@@ -83,18 +83,21 @@ public class SaveManager {
 	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
 	 * 				be associated
 	 * @param project the {@link SimeTimerProject} to save
-	 * @param saveFile saveFile the {@link File} to save the {@link SimeTimerProject} in
+	 * @param saveFile the {@link File} to save the {@link SimeTimerProject} in
 	 * @param fileFormat an int constant to represent the file format to use
+	 * @return true if loading went without Exceptions, else false
 	 */
-	public static void saveProject(SimeTimer owner,
-																 SimeTimerProject project,
-																 File saveFile,
-																 int fileFormat) {
+	public static boolean saveProject(SimeTimer owner,
+																 		SimeTimerProject project,
+																 		File saveFile,
+																 		int fileFormat) {
 		try {
 			if (fileFormat == FILE_FORMAT_PLAIN) {
 				saveProjectToPlainFile(project, saveFile);
+				return true;
 			} else if (fileFormat == FILE_FORMAT_BYTE) {
 				saveProjectToByteFile(project, saveFile);
+				return true;
 			} else {
 				throw new IllegalArgumentException("File format unknown");
 			}
@@ -111,6 +114,7 @@ public class SaveManager {
 																		SAVE_ERROR,
 																		JOptionPane.ERROR_MESSAGE);
 		}
+		return false;
 	}
 	
 	/**
@@ -290,21 +294,13 @@ public class SaveManager {
 	/**
 	 * saves the given data into the default preferences file.
 	 * Handles Exceptions.
-	 * @param loadLastSaveOnStartup loadLastSaveOnStartup
-	 * @param askForCommentOnStop askForCommentOnStop
-	 * @param askForCommentOnCut askForCommentOnCut
-	 * @param askForSaveOnLoad askForSaveOnLoad
-	 * @param askForSaveOnClose askForSaveOnClose
+	 * @param boolOptions all boolean option properties
 	 * @param fileFormat fileFormat
 	 * @param xPosition xPosition
 	 * @param yPosition yPosition
 	 * @param usedFile usedFile
 	 */
-	static void saveConfig(boolean loadLastSaveOnStartup,
-												 boolean askForCommentOnStop,
-												 boolean askForCommentOnCut,
-												 boolean askForSaveOnLoad,
-												 boolean askForSaveOnClose,
+	static void saveConfig(boolean[] boolOptions,
 												 int fileFormat,
 												 int xPosition,
 												 int yPosition,
@@ -313,11 +309,9 @@ public class SaveManager {
 			DataOutputStream output = new DataOutputStream(new FileOutputStream(CONFIG_PATH));
 			// write data
 			// options:
-			output.writeBoolean(loadLastSaveOnStartup);
-			output.writeBoolean(askForCommentOnStop);
-			output.writeBoolean(askForCommentOnCut);
-			output.writeBoolean(askForSaveOnLoad);
-			output.writeBoolean(askForSaveOnClose);
+			for (int i=0; i<boolOptions.length; i++) {
+				output.writeBoolean(boolOptions[i]);
+			}
 			output.writeInt(fileFormat);
 			// preferences:
 			output.writeInt(xPosition);
@@ -347,11 +341,7 @@ public class SaveManager {
 	 */
 	static boolean loadAndSetConfig(ConfigManager callback) {
 		// set default values
-		boolean loadLastSaveOnStartup = ConfigManager.DEFAULT_LOAD_LAST_SAVE_ON_STARTUP;
-		boolean askForCommentOnStop = ConfigManager.DEFAULT_ASK_FOR_COMMENT_ON_STOP;
-		boolean askForCommentOnCut = ConfigManager.DEFAULT_ASK_FOR_COMMENT_ON_CUT;
-		boolean askForSaveOnLoad = ConfigManager.DEFAULT_ASK_FOR_SAVE_ON_LOAD;
-		boolean askForSaveOnClose = ConfigManager.DEFAULT_ASK_FOR_SAVE_ON_CLOSE;
+		boolean[] boolOptions = ConfigManager.DEFAULT_BOOL_OPTIONS;
 		int fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
 		int xPosition = ConfigManager.DEFAULT_X_POSITION;
 		int yPosition = ConfigManager.DEFAULT_Y_POSITION;
@@ -364,17 +354,14 @@ public class SaveManager {
 			input = new DataInputStream(new FileInputStream(CONFIG_PATH));
 			// read data
 			// options:
-			loadLastSaveOnStartup = input.readBoolean();
-			askForCommentOnStop = input.readBoolean();
-			askForCommentOnCut = input.readBoolean();
-			askForSaveOnLoad = input.readBoolean();
-			askForSaveOnClose = input.readBoolean();
+			for (int i=0; i<boolOptions.length; i++) {
+				boolOptions[i] = input.readBoolean();
+			}
 			fileFormat = input.readInt();
 			// preferences:
 			xPosition = input.readInt();
 			yPosition = input.readInt();
-			boolean usedPathWritten = input.readBoolean();
-			if (usedPathWritten) {
+			if (input.readBoolean()) {
 				usedPath = input.readUTF();
 			}
 		} catch (FileNotFoundException e) {
@@ -396,11 +383,7 @@ public class SaveManager {
 			}
 		}
 		// feed back options and preferences
-		callback.setOptions(loadLastSaveOnStartup,
-												askForCommentOnStop,
-												askForCommentOnCut,
-												askForSaveOnLoad,
-												askForSaveOnClose,
+		callback.setOptions(boolOptions,
 												fileFormat);
 		callback.setPreferences(xPosition,
 														yPosition,
