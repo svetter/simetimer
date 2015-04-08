@@ -740,7 +740,9 @@ public class SimeTimer extends JFrame {
 		 * triggers display of a {@link JFileChooser} and saves if user approved
 		 */
 		public void actionPerformed(ActionEvent evt) {
-			fileChooser = new JFileChooser(config.usedFile.getParentFile());
+			fileChooser = new JFileChooser(config.usedFile != null
+																		 ? config.usedFile.getParentFile()
+																		 : null);
 			fileChooser.setMinimumSize(new Dimension(350, 300));
 			// only display directories and .stp files
 			// (and files without an extension)
