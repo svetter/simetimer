@@ -20,6 +20,15 @@ public class ConfigManager {
 	private SimeTimer owner;
 	
 	
+	/**
+	 * sets the minimum number of rows on the table that has to be displayed
+	 */
+	public static final int MIN_TABLE_ROW_COUNT = 0;
+	/**
+	 * sets the maximum number of rows on the table that can be displayed
+	 */
+	public static final int MAX_TABLE_ROW_COUNT = 50;
+	
 	// DEFAULT OPTIONS AND PREFERENCES
 	// Options
 	/**
@@ -65,7 +74,11 @@ public class ConfigManager {
 																												DEFAULT_ASK_FOR_SAVE_ON_LOAD,
 																												DEFAULT_ASK_FOR_SAVE_ON_CLOSE};
 	/**
-	 * determines the file format that will be used
+	 * the default table size
+	 */
+	public static final int DEFAULT_TABLE_SIZE = 10;
+	/**
+	 * the default file format that will be used
 	 * to save and load {@link SimeTimerProject}s
 	 */
 	public static final int DEFAULT_FILE_FORMAT = SaveManager.FILE_FORMAT_PLAIN;
@@ -145,6 +158,11 @@ public class ConfigManager {
 		this.askForSaveOnClose = boolOptions[5];
 	}
 	/**
+	 * determines the size of the table in the {@link SimeTimer}'s main window.
+	 * Can be any of the values defined in {@link ConfigManager}.TABLE_SIZES
+	 */
+	int tableSize;
+	/**
 	 * determines the file format used for saving and loading project files.
 	 * Can be {@link SaveManager}.FILE_FORMAT_PLAIN or
 	 * {@link SaveManager}.FILE_FORMAT_BYTE
@@ -163,10 +181,12 @@ public class ConfigManager {
 	
 	/**
 	 * constructor. Stores the owner {@link SimeTimer}.
+	 * Loads default properties.
 	 * @param owner the owner {@link SimeTimer}
 	 */
 	public ConfigManager(SimeTimer owner) {
 		this.owner = owner;
+		setDefaults();
 	}
 	
 	/**
@@ -183,13 +203,8 @@ public class ConfigManager {
 	 * resets all stored options and preferences to their default.
 	 */
 	public void setDefaults() {
-		loadLastSaveOnStartup = DEFAULT_LOAD_LAST_SAVE_ON_STARTUP;
-		autosave = DEFAULT_AUTOSAVE;
-		askForCommentOnStop = DEFAULT_ASK_FOR_COMMENT_ON_STOP;
-		askForCommentOnCut = DEFAULT_ASK_FOR_COMMENT_ON_CUT;
-		askForSaveOnLoad = DEFAULT_ASK_FOR_SAVE_ON_LOAD;
-		askForSaveOnClose = DEFAULT_ASK_FOR_SAVE_ON_CLOSE;
 		setBoolOptions(DEFAULT_BOOL_OPTIONS);
+		tableSize = DEFAULT_TABLE_SIZE;
 		fileFormat = DEFAULT_FILE_FORMAT;
 		usedFile = DEFAULT_PATH != null ? new File(DEFAULT_PATH) : null;
 	}
@@ -212,11 +227,12 @@ public class ConfigManager {
 		}
 		if (yPosition < 0) {
 			yPosition = 0;
-		} else if (yPosition > SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT) {
-			yPosition = SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT;
+		} else if (yPosition > SimeTimer.SCREEN_HEIGHT - owner.FRAME_HEIGHT()) {
+			yPosition = SimeTimer.SCREEN_HEIGHT - owner.FRAME_HEIGHT();
 		}
 		// save data into file
 		SaveManager.saveConfig(boolOptions(),
+													 tableSize,
 													 fileFormat,
 													 xPosition,
 													 yPosition,
@@ -227,18 +243,28 @@ public class ConfigManager {
 	 * Validates and applies the given options.
 	 * All values are stored in the object variables with the same names.
 	 * @param boolOptions an array representation of all the boolean option properties
+	 * @param tableSize tableSize
 	 * @param fileFormat fileFormat
 	 */
 	void setOptions(boolean[] boolOptions,
+									int tableSize,
 									int fileFormat) {
 		// check validity
+		if (tableSize < MIN_TABLE_ROW_COUNT
+				|| tableSize > MAX_TABLE_ROW_COUNT) {
+			// reset tableSize to default
+			tableSize = ConfigManager.DEFAULT_TABLE_SIZE;
+		}
 		if (fileFormat != SaveManager.FILE_FORMAT_PLAIN
 				&& fileFormat != SaveManager.FILE_FORMAT_BYTE) {
-			// reset file format to default
+			// reset fileFormat to default
 			fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
 		}
 		// set values
 		setBoolOptions(boolOptions);
+		this.tableSize = tableSize;
+		// set new size for main window and table
+		owner.tableSizeChanged();
 		this.fileFormat = fileFormat;
 	}
 	
@@ -254,7 +280,7 @@ public class ConfigManager {
 		if (xPosition < 0
 				|| yPosition < 0
 				|| xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH
-				|| yPosition > SimeTimer.SCREEN_HEIGHT - SimeTimer.FRAME_HEIGHT) {
+				|| yPosition > SimeTimer.SCREEN_HEIGHT - owner.FRAME_HEIGHT()) {
 			// reset position on screen to default
 			xPosition = ConfigManager.DEFAULT_X_POSITION;
 			yPosition = ConfigManager.DEFAULT_Y_POSITION;

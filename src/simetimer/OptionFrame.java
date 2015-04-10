@@ -15,6 +15,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.WindowConstants;
 
 public class OptionFrame extends JFrame {
@@ -23,43 +25,37 @@ public class OptionFrame extends JFrame {
 	
 	// layout constants
 	private static final int DEFAULT_GAP = 10,
-													 NO_GAP = 0,
 													 BIG_GAP = 20;
 	private static final int CHECKBOX_COUNT = ConfigManager.DEFAULT_BOOL_OPTIONS.length,
-													 VERTICAL_CHECKBOX_SIZE = 20,
-													 VERTICAL_CHECKBOX_GAP = NO_GAP;
-	private static final int CHECKBOX_ROW_SIZE = VERTICAL_CHECKBOX_SIZE * CHECKBOX_COUNT
-																							 + VERTICAL_CHECKBOX_GAP * (CHECKBOX_COUNT - 1),
-													 SECOND_ITEM_ROW_SIZE = 25,
-													 THIRD_ITEM_ROW_SIZE = 30;
-	public static final int FIRST_ITEM_COLUMN_SIZE = 110,
-													SECOND_ITEM_COLUMN_SIZE = 90,
-													CANCEL_COLUMN_SIZE = 80,
-													OK_COLUMN_SIZE = 60,
-													FULL_WIDTH_COLUMN_SIZE = 270;
+													 CHECKBOX_HEIGHT = 20,
+													 VERTICAL_CHECKBOX_GAP = 0;
+	private static final int CHECKBOX_ROW_HEIGHT = CHECKBOX_HEIGHT * CHECKBOX_COUNT
+																								 + VERTICAL_CHECKBOX_GAP * (CHECKBOX_COUNT - 1),
+													 SECOND_ITEM_ROW_HEIGHT = 25,
+													 THIRD_ITEM_ROW_HEIGHT = 25,
+													 FOURTH_ITEM_ROW_HEIGHT = 30;
+	public static final int FIRST_ITEM_COLUMN_WIDTH = 110,
+													FULL_COLUMN_WIDTH = 270;
 	public static final int CHECKBOX_ROW_OFFSET = DEFAULT_GAP,
 													SECOND_ITEM_ROW_OFFSET = CHECKBOX_ROW_OFFSET
-																									 + CHECKBOX_ROW_SIZE
+																									 + CHECKBOX_ROW_HEIGHT
 																									 + DEFAULT_GAP,
 													THIRD_ITEM_ROW_OFFSET = SECOND_ITEM_ROW_OFFSET
-																									+ SECOND_ITEM_ROW_SIZE
+																									+ SECOND_ITEM_ROW_HEIGHT
+																									+ DEFAULT_GAP,
+													FOURTH_ITEM_ROW_OFFSET = THIRD_ITEM_ROW_OFFSET
+																									+ THIRD_ITEM_ROW_HEIGHT
 																									+ BIG_GAP;
 	public static final int FIRST_ITEM_COLUMN_OFFSET = DEFAULT_GAP,
 													SECOND_ITEM_COLUMN_OFFSET = FIRST_ITEM_COLUMN_OFFSET
-																											+ FIRST_ITEM_COLUMN_SIZE
-																											+ NO_GAP,
-													OK_COLUMN_OFFSET = FULL_WIDTH_COLUMN_SIZE
-																						 - OK_COLUMN_SIZE,
-													CANCEL_COLUMN_OFFSET = OK_COLUMN_OFFSET
-																								 - DEFAULT_GAP
-																								 - CANCEL_COLUMN_SIZE;
+																											+ FIRST_ITEM_COLUMN_WIDTH;
 	// window constants
 	public static final int FRAME_WIDTH = DEFAULT_GAP
-																				+ FULL_WIDTH_COLUMN_SIZE - 10
+																				+ FULL_COLUMN_WIDTH - 10
 																				+ DEFAULT_GAP
 																				+ 6;
-	public static final int FRAME_HEIGHT = THIRD_ITEM_ROW_OFFSET
-																				 + THIRD_ITEM_ROW_SIZE
+	public static final int FRAME_HEIGHT = FOURTH_ITEM_ROW_OFFSET
+																				 + FOURTH_ITEM_ROW_HEIGHT
 																				 + DEFAULT_GAP
 																				 + 28;
 	
@@ -68,6 +64,8 @@ public class OptionFrame extends JFrame {
 	
 	// layout elements
 	private JCheckBox[] checkboxes = new JCheckBox[CHECKBOX_COUNT];
+	private JLabel tableSizeLabel = new JLabel();
+	private JSpinner tableSizeSpinner = new JSpinner();
 	private JLabel fileFormatLabel = new JLabel();
 	private JComboBox<String> fileFormatCombobox = new JComboBox<String>();
 	private JButton okButton = new JButton();
@@ -94,7 +92,7 @@ public class OptionFrame extends JFrame {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setLocation(owner.getLocationOnScreen().x + ((SimeTimer.FRAME_WIDTH - FRAME_WIDTH) / 2),
-								owner.getLocationOnScreen().y + ((SimeTimer.FRAME_HEIGHT - FRAME_HEIGHT) / 2));
+								owner.getLocationOnScreen().y + ((owner.FRAME_HEIGHT() - FRAME_HEIGHT) / 2));
 		setResizable(false);
 		Container cp = getContentPane();
 		cp.setLayout(null);
@@ -119,45 +117,69 @@ public class OptionFrame extends JFrame {
 			checkboxes[i] = new JCheckBox();
 			checkboxes[i].setBounds(FIRST_ITEM_COLUMN_OFFSET - 4,
 															CHECKBOX_ROW_OFFSET
-															+ i * (VERTICAL_CHECKBOX_SIZE
+															+ i * (CHECKBOX_HEIGHT
 																		 + VERTICAL_CHECKBOX_GAP),
-															FULL_WIDTH_COLUMN_SIZE,
-															VERTICAL_CHECKBOX_SIZE);
+																		 FULL_COLUMN_WIDTH,
+															CHECKBOX_HEIGHT);
 			checkboxes[i].setText(checkBoxStrings[i]);
 			checkboxes[i].setFont(new Font("Dialog", Font.PLAIN, 12));
 			checkboxes[i].setSelected(checkBoxStatus[i]);
 			cp.add(checkboxes[i]);
 		}
 		
+		// table size
+		tableSizeLabel.setBounds(FIRST_ITEM_COLUMN_OFFSET,
+														 SECOND_ITEM_ROW_OFFSET,
+														 FIRST_ITEM_COLUMN_WIDTH,
+														 SECOND_ITEM_ROW_HEIGHT);
+		tableSizeLabel.setText("Table size: ");
+		tableSizeLabel.setFont(new Font("Dialog", Font.PLAIN, 14));
+		cp.add(tableSizeLabel);
+		
+		tableSizeSpinner.setBounds(SECOND_ITEM_COLUMN_OFFSET,
+															 SECOND_ITEM_ROW_OFFSET,
+															 50,
+															 SECOND_ITEM_ROW_HEIGHT);
+		tableSizeSpinner.setModel(new SpinnerNumberModel(config.tableSize,
+																										 ConfigManager.MIN_TABLE_ROW_COUNT,
+																										 ConfigManager.MAX_TABLE_ROW_COUNT,
+																										 1));
+		cp.add(tableSizeSpinner);
+		
+		// file format
 		fileFormatLabel.setBounds(FIRST_ITEM_COLUMN_OFFSET,
-															SECOND_ITEM_ROW_OFFSET,
-															FIRST_ITEM_COLUMN_SIZE,
-															SECOND_ITEM_ROW_SIZE);
+															THIRD_ITEM_ROW_OFFSET,
+															FIRST_ITEM_COLUMN_WIDTH,
+															THIRD_ITEM_ROW_HEIGHT);
 		fileFormatLabel.setText("Save file format: ");
 		fileFormatLabel.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cp.add(fileFormatLabel);
 		
 		fileFormatCombobox.setBounds(SECOND_ITEM_COLUMN_OFFSET,
-																 SECOND_ITEM_ROW_OFFSET,
-																 SECOND_ITEM_COLUMN_SIZE,
-																 SECOND_ITEM_ROW_SIZE);
+																 THIRD_ITEM_ROW_OFFSET,
+																 90,
+																 THIRD_ITEM_ROW_HEIGHT);
 		fileFormatCombobox.setModel(new DefaultComboBoxModel<String>(new String[] {"Plain text", "Byte coded"}));
 		fileFormatCombobox.setFont(new Font("Dialog", Font.PLAIN, 12));
 		fileFormatCombobox.setSelectedIndex(config.fileFormat != SaveManager.FILE_FORMAT_BYTE ? 0 : 1);
 		cp.add(fileFormatCombobox);
 		
-		okButton.setBounds(OK_COLUMN_OFFSET,
-											 THIRD_ITEM_ROW_OFFSET,
-											 OK_COLUMN_SIZE,
-											 THIRD_ITEM_ROW_SIZE);
+		// OK BUTTON
+		okButton.setBounds(FULL_COLUMN_WIDTH
+											 - 60,
+											 FOURTH_ITEM_ROW_OFFSET,
+											 60,
+											 FOURTH_ITEM_ROW_HEIGHT);
 		okButton.setText("OK");
 		okButton.setFont(new Font("Dialog", Font.BOLD, 12));
 		cp.add(okButton);
 		
-		cancelButton.setBounds(CANCEL_COLUMN_OFFSET,
-													 THIRD_ITEM_ROW_OFFSET,
-													 CANCEL_COLUMN_SIZE,
-													 THIRD_ITEM_ROW_SIZE);
+		cancelButton.setBounds(okButton.getX()
+													 - DEFAULT_GAP
+													 - 80,
+													 FOURTH_ITEM_ROW_OFFSET,
+													 80,
+													 FOURTH_ITEM_ROW_HEIGHT);
 		cancelButton.setText("Cancel");
 		cancelButton.setFont(new Font("Dialog", Font.BOLD, 12));
 		cp.add(cancelButton);
@@ -173,6 +195,7 @@ public class OptionFrame extends JFrame {
 					boolOptions[i] = checkboxes[i].isSelected();
 				}
 				config.setOptions(boolOptions,
+													(int) tableSizeSpinner.getModel().getValue(),
 													fileFormatCombobox.getSelectedIndex() != 1
 														? SaveManager.FILE_FORMAT_PLAIN
 														: SaveManager.FILE_FORMAT_BYTE);
@@ -232,9 +255,10 @@ public class OptionFrame extends JFrame {
 	private boolean changesMade() {
 		boolean boolsChanged = false;
 		for (int i = 0; i < CHECKBOX_COUNT; i++) {
-			boolsChanged |= checkboxes[i].isSelected() ^ /* != */ config.boolOptions()[i];
+			boolsChanged |= checkboxes[i].isSelected() != config.boolOptions()[i];
 		}
 		return boolsChanged
+					 || (int) tableSizeSpinner.getModel().getValue() != config.tableSize
 					 || (fileFormatCombobox.getSelectedIndex() == 0
 					 		 && config.fileFormat == SaveManager.FILE_FORMAT_BYTE)
 					 || (fileFormatCombobox.getSelectedIndex() == 1

@@ -41,53 +41,52 @@ public class SimeTimer extends JFrame {
 	
 	
 	// LAYOUT CONSTANTS
-	/**
-	 * determines how many rows the {@link JTable} can show at once
-	 */
-	private static final int TABLE_ROWS = 10;
 	
 	private static final int DEFAULT_GAP = 10,
 													 SMALL_GAP = 5,
 													 BIG_GAP = 15;
-	private static final int FIRST_ITEM_ROW_SIZE = 40,
-													 SECOND_ITEM_ROW_SIZE = 25,
-													 THIRD_ITEM_ROW_SIZE = 25,
-													 FOURTH_ITEM_ROW_SIZE = TABLE_ROWS * 16 + 38;
-	private static final int FIRST_ITEM_COLUMN_SIZE = THIRD_ITEM_ROW_SIZE,
-													 SECOND_ITEM_COLUMN_SIZE = 75,
-													 THIRD_ITEM_COLUMN_SIZE = SECOND_ITEM_COLUMN_SIZE,
-													 FOURTH_ITEM_COLUMN_SIZE = 80,
-													 DOUBLE_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE
+	private static final int FIRST_ITEM_ROW_HEIGHT = 40,
+													 SECOND_ITEM_ROW_HEIGHT = 25,
+													 THIRD_ITEM_ROW_HEIGHT = 25,
+													 DEFAULT_TABLE_ROW_HEIGHT = ConfigManager.DEFAULT_TABLE_SIZE * 16 + 38;
+	private int TABLE_ROW_HEIGHT() {
+		return config.tableSize * 16 + 38;
+	}
+	private static final int FIRST_ITEM_COLUMN_WIDTH = THIRD_ITEM_ROW_HEIGHT,
+													 SECOND_ITEM_COLUMN_WIDTH = 75,
+													 THIRD_ITEM_COLUMN_WIDTH = SECOND_ITEM_COLUMN_WIDTH,
+													 FOURTH_ITEM_COLUMN_WIDTH = 80,
+													 DOUBLE_WIDTH_COLUMN_WIDTH = FIRST_ITEM_COLUMN_WIDTH
 													 														+ DEFAULT_GAP
-													 														+ SECOND_ITEM_COLUMN_SIZE
+													 														+ SECOND_ITEM_COLUMN_WIDTH
 													 														+ DEFAULT_GAP
-													 														+ THIRD_ITEM_COLUMN_SIZE,
-													 FULL_WIDTH_COLUMN_SIZE = FIRST_ITEM_COLUMN_SIZE
-													 													+ DEFAULT_GAP
-													 													+ SECOND_ITEM_COLUMN_SIZE
-													 													+ DEFAULT_GAP
-													 													+ THIRD_ITEM_COLUMN_SIZE
-													 													+ DEFAULT_GAP
-													 													+ FOURTH_ITEM_COLUMN_SIZE;
+													 														+ THIRD_ITEM_COLUMN_WIDTH,
+													 FULL_WIDTH_COLUMN_WIDTH = FIRST_ITEM_COLUMN_WIDTH
+													 													 + DEFAULT_GAP
+													 													 + SECOND_ITEM_COLUMN_WIDTH
+													 													 + DEFAULT_GAP
+													 													 + THIRD_ITEM_COLUMN_WIDTH
+													 													 + DEFAULT_GAP
+													 													 + FOURTH_ITEM_COLUMN_WIDTH;
 	private static final int FIRST_ITEM_ROW_OFFSET = DEFAULT_GAP,
 													 SECOND_ITEM_ROW_OFFSET = FIRST_ITEM_ROW_OFFSET
-													 													+ FIRST_ITEM_ROW_SIZE
+													 													+ FIRST_ITEM_ROW_HEIGHT
 													 													+ SMALL_GAP,
 													 THIRD_ITEM_ROW_OFFSET = SECOND_ITEM_ROW_OFFSET
-													 												 + SECOND_ITEM_ROW_SIZE
+													 												 + SECOND_ITEM_ROW_HEIGHT
 													 												 + DEFAULT_GAP,
-													 FOURTH_ITEM_ROW_OFFSET = THIRD_ITEM_ROW_OFFSET
-													 													+ THIRD_ITEM_ROW_SIZE
-													 													+ BIG_GAP;
+													 TABLE_ROW_OFFSET = THIRD_ITEM_ROW_OFFSET
+													 										+ THIRD_ITEM_ROW_HEIGHT
+													 										+ BIG_GAP;
 	private static final int FIRST_ITEM_COLUMN_OFFSET = DEFAULT_GAP,
 													 SECOND_ITEM_COLUMN_OFFSET = FIRST_ITEM_COLUMN_OFFSET
-													 														 + FIRST_ITEM_COLUMN_SIZE
+													 														 + FIRST_ITEM_COLUMN_WIDTH
 													 														 + DEFAULT_GAP,
 													 THIRD_ITEM_COLUMN_OFFSET = SECOND_ITEM_COLUMN_OFFSET
-													 														+ SECOND_ITEM_COLUMN_SIZE
+													 														+ SECOND_ITEM_COLUMN_WIDTH
 													 														+ DEFAULT_GAP,
 													 FOURTH_ITEM_COLUMN_OFFSET = THIRD_ITEM_COLUMN_OFFSET
-													 														 + THIRD_ITEM_COLUMN_SIZE
+													 														 + THIRD_ITEM_COLUMN_WIDTH
 													 														 + DEFAULT_GAP;
 	
 	
@@ -96,16 +95,35 @@ public class SimeTimer extends JFrame {
 	 * the width of the {@link JFrame}, corrected (+6)
 	 */
 	public static final int FRAME_WIDTH = FIRST_ITEM_COLUMN_OFFSET
-																				+ FULL_WIDTH_COLUMN_SIZE
+																				+ FULL_WIDTH_COLUMN_WIDTH
 																				+ DEFAULT_GAP
 																				+ 6;
 	/**
 	 * the height of the {@link JFrame}, corrected (+28)
 	 */
-	public static final int FRAME_HEIGHT = FOURTH_ITEM_ROW_OFFSET
-																				 + FOURTH_ITEM_ROW_SIZE
-																				 + DEFAULT_GAP
-																				 + 28;
+	public static final int DEFAULT_FRAME_HEIGHT = TABLE_ROW_OFFSET
+																								 + DEFAULT_TABLE_ROW_HEIGHT
+																								 + DEFAULT_GAP
+																								 + 28;
+	/**
+	 * calculates the frame height from the actual current table row count
+	 * @return the current frame height
+	 */
+	public int FRAME_HEIGHT() {
+		if (config.tableSize == 0) {
+			// table is not displayed
+			return THIRD_ITEM_ROW_OFFSET
+						 + THIRD_ITEM_ROW_HEIGHT
+						 + DEFAULT_GAP
+						 + 28;
+		} else {
+			// table is displayed
+			return TABLE_ROW_OFFSET
+					 + TABLE_ROW_HEIGHT()
+					 + DEFAULT_GAP
+					 + 28;
+		}
+	}
 	/**
 	 * the system's main screen width, set at runtime
 	 */
@@ -173,9 +191,8 @@ public class SimeTimer extends JFrame {
 				Toolkit.getDefaultToolkit().getImage(
 						getClass().getClassLoader().getResource("simetimer/simetimer.png")));
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setSize(FRAME_WIDTH, FRAME_HEIGHT);
+		setSize(FRAME_WIDTH, FRAME_HEIGHT());
 		setResizable(false);
-		config.initialize();
 		Container cp = getContentPane();
 		cp.setLayout(null);
 		
@@ -183,32 +200,32 @@ public class SimeTimer extends JFrame {
 		
 		totalTimeLabel.setBounds(FIRST_ITEM_COLUMN_OFFSET,
 														 FIRST_ITEM_ROW_OFFSET,
-														 DOUBLE_WIDTH_COLUMN_SIZE,
-														 FIRST_ITEM_ROW_SIZE);
+														 DOUBLE_WIDTH_COLUMN_WIDTH,
+														 FIRST_ITEM_ROW_HEIGHT);
 		totalTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		totalTimeLabel.setFont(new Font("Dialog", Font.PLAIN, 30));
 		cp.add(totalTimeLabel);
 		
 		chunkTimeLabel.setBounds(FIRST_ITEM_COLUMN_OFFSET,
 														 SECOND_ITEM_ROW_OFFSET,
-														 DOUBLE_WIDTH_COLUMN_SIZE,
-														 SECOND_ITEM_ROW_SIZE);
+														 DOUBLE_WIDTH_COLUMN_WIDTH,
+														 SECOND_ITEM_ROW_HEIGHT);
 		chunkTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		chunkTimeLabel.setFont(new Font("Dialog", Font.PLAIN, 24));
 		cp.add(chunkTimeLabel);
 		
 		startStopButton.setBounds(FOURTH_ITEM_COLUMN_OFFSET,
 															FIRST_ITEM_ROW_OFFSET,
-															FOURTH_ITEM_COLUMN_SIZE,
-															FIRST_ITEM_ROW_SIZE);
+															FOURTH_ITEM_COLUMN_WIDTH,
+															FIRST_ITEM_ROW_HEIGHT);
 		startStopButton.setText("Start");
 		startStopButton.setFont(new Font("Dialog", Font.BOLD, 20));
 		cp.add(startStopButton);
 		
 		cutButton.setBounds(FOURTH_ITEM_COLUMN_OFFSET,
 												SECOND_ITEM_ROW_OFFSET,
-												FOURTH_ITEM_COLUMN_SIZE,
-												SECOND_ITEM_ROW_SIZE);
+												FOURTH_ITEM_COLUMN_WIDTH,
+												SECOND_ITEM_ROW_HEIGHT);
 		cutButton.setText("cut");
 		cutButton.setToolTipText("Finish the current segment and instantly begin a new one");
 		cutButton.setFont(new Font("Dialog", Font.PLAIN, 14));
@@ -216,8 +233,8 @@ public class SimeTimer extends JFrame {
 		
 		saveButton.setBounds(SECOND_ITEM_COLUMN_OFFSET,
 												 THIRD_ITEM_ROW_OFFSET,
-												 SECOND_ITEM_COLUMN_SIZE,
-												 THIRD_ITEM_ROW_SIZE);
+												 SECOND_ITEM_COLUMN_WIDTH,
+												 THIRD_ITEM_ROW_HEIGHT);
 		saveButton.setText("save");
 		saveButton.setToolTipText("Save the current project to a file");
 		saveButton.setFont(new Font("Dialog", Font.PLAIN, 14));
@@ -225,8 +242,8 @@ public class SimeTimer extends JFrame {
 		
 		loadButton.setBounds(THIRD_ITEM_COLUMN_OFFSET,
 												 THIRD_ITEM_ROW_OFFSET,
-												 THIRD_ITEM_COLUMN_SIZE,
-												 THIRD_ITEM_ROW_SIZE);
+												 THIRD_ITEM_COLUMN_WIDTH,
+												 THIRD_ITEM_ROW_HEIGHT);
 		loadButton.setText("load");
 		loadButton.setToolTipText("Load a project from a file");
 		loadButton.setFont(new Font("Dialog", Font.PLAIN, 14));
@@ -234,8 +251,8 @@ public class SimeTimer extends JFrame {
 		
 		resetButton.setBounds(FOURTH_ITEM_COLUMN_OFFSET,
 													THIRD_ITEM_ROW_OFFSET,
-													FOURTH_ITEM_COLUMN_SIZE,
-													THIRD_ITEM_ROW_SIZE);
+													FOURTH_ITEM_COLUMN_WIDTH,
+													THIRD_ITEM_ROW_HEIGHT);
 		resetButton.setText("reset");
 		resetButton.setFont(new Font("Dialog", Font.PLAIN, 14));
 		resetButton.setBackground(new Color(255, 200, 200));
@@ -243,8 +260,8 @@ public class SimeTimer extends JFrame {
 		
 		optionsButton.setBounds(FIRST_ITEM_COLUMN_OFFSET,
 														THIRD_ITEM_ROW_OFFSET,
-														FIRST_ITEM_COLUMN_SIZE,
-														THIRD_ITEM_ROW_SIZE);
+														FIRST_ITEM_COLUMN_WIDTH,
+														THIRD_ITEM_ROW_HEIGHT);
 		optionsButton.setIcon(
 				new ImageIcon(Toolkit.getDefaultToolkit().getImage(
 						getClass().getClassLoader().getResource("simetimer/options.png"))));
@@ -253,9 +270,9 @@ public class SimeTimer extends JFrame {
 		// TABLE
 		// set ScrollPane properties
 		tableScrollPane.setBounds(FIRST_ITEM_COLUMN_OFFSET,
-															FOURTH_ITEM_ROW_OFFSET,
-															FULL_WIDTH_COLUMN_SIZE,
-															FOURTH_ITEM_ROW_SIZE);
+															TABLE_ROW_OFFSET,
+															FULL_WIDTH_COLUMN_WIDTH,
+															TABLE_ROW_HEIGHT());
 		tableScrollPane.setAutoscrolls(true);
 		tableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		tableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -440,6 +457,8 @@ public class SimeTimer extends JFrame {
 		
 		
 		// frame ready
+		// load configuration
+		config.initialize();
 		// set Lable texts
 		refreshTimeLabels();
 		setVisible(true);
@@ -495,6 +514,7 @@ public class SimeTimer extends JFrame {
 			unsavedData = false;
 		}
 	}
+	
 	
 	/**
 	 * sets table model, properties and column names, widths and alignment
@@ -613,6 +633,10 @@ public class SimeTimer extends JFrame {
 		tableScrollPane.getVerticalScrollBar().setValue(tableScrollPane.getVerticalScrollBar().getMaximum());
 	}
 	
+	/**
+	 * tries to save data to last used save file if autosave is enabled.
+	 * When that fails or autosave is disabled, sets the changesMade flag.
+	 */
 	private void changeMade() {
 		if (config.autosave) {
 			// try to save data
@@ -620,6 +644,14 @@ public class SimeTimer extends JFrame {
 		} else {
 			unsavedData = true;
 		}
+	}
+	
+	/**
+	 * updates the window and table size to match the current configuration
+	 */
+	void tableSizeChanged() {
+		this.setSize(FRAME_WIDTH, FRAME_HEIGHT());
+		tableScrollPane.setSize(FULL_WIDTH_COLUMN_WIDTH, TABLE_ROW_HEIGHT());
 	}
 	
 	/**

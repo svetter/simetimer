@@ -47,7 +47,7 @@ public class SaveManager {
 	public static final String SEPARATOR = "\t";
 	/**
 	 * Used to represent a nonexistent usedFile path in the method
-	 * {@link #saveConfig(boolean[], int, int, int, File)}.
+	 * {@link #saveConfig(boolean[], int, int, int, int, File)}.
 	 * An empty file will be translated into this {@link String}.
 	 */
 	public static final String NULL_PATH = "*null*";
@@ -295,12 +295,14 @@ public class SaveManager {
 	 * saves the given data into the default preferences file.
 	 * Handles Exceptions.
 	 * @param boolOptions all boolean option properties
+	 * @param tableSize tableSize
 	 * @param fileFormat fileFormat
 	 * @param xPosition xPosition
 	 * @param yPosition yPosition
 	 * @param usedFile usedFile
 	 */
 	static void saveConfig(boolean[] boolOptions,
+												 int tableSize,
 												 int fileFormat,
 												 int xPosition,
 												 int yPosition,
@@ -312,6 +314,7 @@ public class SaveManager {
 			for (int i=0; i<boolOptions.length; i++) {
 				output.writeBoolean(boolOptions[i]);
 			}
+			output.writeInt(tableSize);
 			output.writeInt(fileFormat);
 			// preferences:
 			output.writeInt(xPosition);
@@ -342,6 +345,7 @@ public class SaveManager {
 	static boolean loadAndSetConfig(ConfigManager callback) {
 		// set default values
 		boolean[] boolOptions = ConfigManager.DEFAULT_BOOL_OPTIONS;
+		int tableSize = ConfigManager.DEFAULT_TABLE_SIZE;
 		int fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
 		int xPosition = ConfigManager.DEFAULT_X_POSITION;
 		int yPosition = ConfigManager.DEFAULT_Y_POSITION;
@@ -357,6 +361,7 @@ public class SaveManager {
 			for (int i=0; i<boolOptions.length; i++) {
 				boolOptions[i] = input.readBoolean();
 			}
+			tableSize = input.readInt();
 			fileFormat = input.readInt();
 			// preferences:
 			xPosition = input.readInt();
@@ -384,6 +389,7 @@ public class SaveManager {
 		}
 		// feed back options and preferences
 		callback.setOptions(boolOptions,
+												tableSize,
 												fileFormat);
 		callback.setPreferences(xPosition,
 														yPosition,
