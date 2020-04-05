@@ -65,14 +65,20 @@ public class ConfigManager {
 	 */
 	public static final boolean DEFAULT_ASK_FOR_SAVE_ON_CLOSE = true;
 	/**
+	 * default option for whether the SimeTimer shows the wide table
+	 * where all columns are visible at the same time
+	 */
+	public static final boolean DEFAULT_WIDE_TABLE = false;
+	/**
 	 * array representation of all the boolean default option properties
 	 */
 	public static final boolean[] DEFAULT_BOOL_OPTIONS = {DEFAULT_LOAD_LAST_SAVE_ON_STARTUP,
-																												DEFAULT_AUTOSAVE,
-																												DEFAULT_ASK_FOR_COMMENT_ON_STOP,
-																												DEFAULT_ASK_FOR_COMMENT_ON_CUT,
-																												DEFAULT_ASK_FOR_SAVE_ON_LOAD,
-																												DEFAULT_ASK_FOR_SAVE_ON_CLOSE};
+															DEFAULT_AUTOSAVE,
+															DEFAULT_ASK_FOR_COMMENT_ON_STOP,
+															DEFAULT_ASK_FOR_COMMENT_ON_CUT,
+															DEFAULT_ASK_FOR_SAVE_ON_LOAD,
+															DEFAULT_ASK_FOR_SAVE_ON_CLOSE,
+															DEFAULT_WIDE_TABLE};
 	/**
 	 * the default table size
 	 */
@@ -133,16 +139,22 @@ public class ConfigManager {
 	 */
 	boolean askForSaveOnClose;
 	/**
+	 * determines whether the application shows the wide table
+	 * where all columns are visible at the same time.
+	 */
+	boolean wideTable;
+	/**
 	 * returns an array representation of all the boolean option properties
 	 * @return an array representation of all the boolean option properties
 	 */
 	boolean[] boolOptions() {
 		return new boolean[] {loadLastSaveOnStartup,
-													autosave,
-													askForCommentOnStop,
-													askForCommentOnCut,
-													askForSaveOnLoad,
-													askForSaveOnClose};
+								autosave,
+								askForCommentOnStop,
+								askForCommentOnCut,
+								askForSaveOnLoad,
+								askForSaveOnClose,
+								wideTable};
 	}
 	/**
 	 * sets all the boolean options properties
@@ -156,6 +168,7 @@ public class ConfigManager {
 		this.askForCommentOnCut = boolOptions[3];
 		this.askForSaveOnLoad = boolOptions[4];
 		this.askForSaveOnClose = boolOptions[5];
+		this.wideTable = boolOptions[6];
 	}
 	/**
 	 * determines the size of the table in the {@link SimeTimer}'s main window.
@@ -222,8 +235,8 @@ public class ConfigManager {
 		// check for screen positions too close to the edge
 		if (xPosition < 0) {
 			xPosition = 0;
-		} else if (xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH) {
-			xPosition = SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH;
+		} else if (xPosition > SimeTimer.SCREEN_WIDTH - owner.FRAME_WIDTH()) {
+			xPosition = SimeTimer.SCREEN_WIDTH - owner.FRAME_WIDTH();
 		}
 		if (yPosition < 0) {
 			yPosition = 0;
@@ -232,11 +245,11 @@ public class ConfigManager {
 		}
 		// save data into file
 		SaveManager.saveConfig(boolOptions(),
-													 tableSize,
-													 fileFormat,
-													 xPosition,
-													 yPosition,
-													 usedFile);
+								tableSize,
+								fileFormat,
+								xPosition,
+								yPosition,
+								usedFile);
 	}
 	
 	/**
@@ -247,8 +260,8 @@ public class ConfigManager {
 	 * @param fileFormat fileFormat
 	 */
 	void setOptions(boolean[] boolOptions,
-									int tableSize,
-									int fileFormat) {
+					int tableSize,
+					int fileFormat) {
 		// check validity
 		if (tableSize < MIN_TABLE_ROW_COUNT
 				|| tableSize > MAX_TABLE_ROW_COUNT) {
@@ -279,16 +292,15 @@ public class ConfigManager {
 		// check validity
 		if (xPosition < 0
 				|| yPosition < 0
-				|| xPosition > SimeTimer.SCREEN_WIDTH - SimeTimer.FRAME_WIDTH
+				|| xPosition > SimeTimer.SCREEN_WIDTH - owner.FRAME_WIDTH()
 				|| yPosition > SimeTimer.SCREEN_HEIGHT - owner.FRAME_HEIGHT()) {
 			// reset position on screen to default
 			xPosition = ConfigManager.DEFAULT_X_POSITION;
 			yPosition = ConfigManager.DEFAULT_Y_POSITION;
 		}
 		File usedFile = usedPath != null
-											&& !usedPath.equals(SaveManager.NULL_PATH)
-										? new File(usedPath)
-										: null;
+						&& !usedPath.equals(SaveManager.NULL_PATH)
+						? new File(usedPath) : null;
 		// position owner window
 		owner.setLocation(xPosition, yPosition);
 		// store usedFile

@@ -26,7 +26,7 @@ import javax.swing.table.TableColumnModel;
 /**
  * The {@link SimeTimer} is a slick but powerful stopwatch designed
  * to keep track of the time one puts into one ore many different projects.
- * As well as one can use it like a traditional stopwatch
+ * As well as using it like a traditional stopwatch
  * (including a lap function), you can accumulate sessions, of which the
  * {@link SimeTimer} will store start date and time as well as the
  * elapsed time between two presses of the start/stop-button.
@@ -42,69 +42,84 @@ public class SimeTimer extends JFrame {
 	
 	// LAYOUT CONSTANTS
 	
-	private static final int DEFAULT_GAP = 10,
-													 SMALL_GAP = 5,
-													 BIG_GAP = 15;
-	private static final int FIRST_ITEM_ROW_HEIGHT = 40,
-													 SECOND_ITEM_ROW_HEIGHT = 25,
-													 THIRD_ITEM_ROW_HEIGHT = 25,
-													 DEFAULT_TABLE_ROW_HEIGHT = ConfigManager.DEFAULT_TABLE_SIZE * 16 + 38;
+	private static final int	DEFAULT_GAP					= 10,
+								SMALL_GAP					= 5,
+								BIG_GAP						= 15;
+	private static final int	FIRST_ITEM_ROW_HEIGHT		= 40,
+								SECOND_ITEM_ROW_HEIGHT		= 25,
+								THIRD_ITEM_ROW_HEIGHT		= 25,
+								DEFAULT_TABLE_ROW_HEIGHT	= ConfigManager.DEFAULT_TABLE_SIZE * 16 + 38;
+	private int TABLE_WIDTH() {
+		return config.wideTable ? TABLE_WIDTH_WIDE : TABLE_WIDTH_STANDARD;
+	}
 	private int TABLE_ROW_HEIGHT() {
 		return config.tableSize * 16 + 38;
 	}
-	private static final int FIRST_ITEM_COLUMN_WIDTH = THIRD_ITEM_ROW_HEIGHT,
-													 SECOND_ITEM_COLUMN_WIDTH = 75,
-													 THIRD_ITEM_COLUMN_WIDTH = SECOND_ITEM_COLUMN_WIDTH,
-													 FOURTH_ITEM_COLUMN_WIDTH = 80,
-													 DOUBLE_WIDTH_COLUMN_WIDTH = FIRST_ITEM_COLUMN_WIDTH
-													 														+ DEFAULT_GAP
-													 														+ SECOND_ITEM_COLUMN_WIDTH
-													 														+ DEFAULT_GAP
-													 														+ THIRD_ITEM_COLUMN_WIDTH,
-													 FULL_WIDTH_COLUMN_WIDTH = FIRST_ITEM_COLUMN_WIDTH
-													 													 + DEFAULT_GAP
-													 													 + SECOND_ITEM_COLUMN_WIDTH
-													 													 + DEFAULT_GAP
-													 													 + THIRD_ITEM_COLUMN_WIDTH
-													 													 + DEFAULT_GAP
-													 													 + FOURTH_ITEM_COLUMN_WIDTH;
-	private static final int FIRST_ITEM_ROW_OFFSET = DEFAULT_GAP,
-													 SECOND_ITEM_ROW_OFFSET = FIRST_ITEM_ROW_OFFSET
-													 													+ FIRST_ITEM_ROW_HEIGHT
-													 													+ SMALL_GAP,
-													 THIRD_ITEM_ROW_OFFSET = SECOND_ITEM_ROW_OFFSET
-													 												 + SECOND_ITEM_ROW_HEIGHT
-													 												 + DEFAULT_GAP,
-													 TABLE_ROW_OFFSET = THIRD_ITEM_ROW_OFFSET
-													 										+ THIRD_ITEM_ROW_HEIGHT
-													 										+ BIG_GAP;
-	private static final int FIRST_ITEM_COLUMN_OFFSET = DEFAULT_GAP,
-													 SECOND_ITEM_COLUMN_OFFSET = FIRST_ITEM_COLUMN_OFFSET
-													 														 + FIRST_ITEM_COLUMN_WIDTH
-													 														 + DEFAULT_GAP,
-													 THIRD_ITEM_COLUMN_OFFSET = SECOND_ITEM_COLUMN_OFFSET
-													 														+ SECOND_ITEM_COLUMN_WIDTH
-													 														+ DEFAULT_GAP,
-													 FOURTH_ITEM_COLUMN_OFFSET = THIRD_ITEM_COLUMN_OFFSET
-													 														 + THIRD_ITEM_COLUMN_WIDTH
-													 														 + DEFAULT_GAP;
+	private static final int	FIRST_ITEM_COLUMN_WIDTH		= THIRD_ITEM_ROW_HEIGHT,
+								SECOND_ITEM_COLUMN_WIDTH	= 75,
+								THIRD_ITEM_COLUMN_WIDTH		= SECOND_ITEM_COLUMN_WIDTH,
+								FOURTH_ITEM_COLUMN_WIDTH	= 80,
+								DOUBLE_WIDTH_COLUMN_WIDTH	= FIRST_ITEM_COLUMN_WIDTH
+													 			+ DEFAULT_GAP
+													 			+ SECOND_ITEM_COLUMN_WIDTH
+													 			+ DEFAULT_GAP
+													 			+ THIRD_ITEM_COLUMN_WIDTH,
+								TABLE_WIDTH_STANDARD		= FIRST_ITEM_COLUMN_WIDTH
+													 			+ DEFAULT_GAP
+													 			+ SECOND_ITEM_COLUMN_WIDTH
+													 			+ DEFAULT_GAP
+													 			+ THIRD_ITEM_COLUMN_WIDTH
+													 			+ DEFAULT_GAP
+													 			+ FOURTH_ITEM_COLUMN_WIDTH,
+								TABLE_WIDTH_WIDE			= TABLE_WIDTH_STANDARD * 2 - 18;
+	private static final int	FIRST_ITEM_ROW_OFFSET		= DEFAULT_GAP,
+								SECOND_ITEM_ROW_OFFSET		= FIRST_ITEM_ROW_OFFSET
+													 			+ FIRST_ITEM_ROW_HEIGHT
+													 			+ SMALL_GAP,
+								THIRD_ITEM_ROW_OFFSET		= SECOND_ITEM_ROW_OFFSET
+													 			+ SECOND_ITEM_ROW_HEIGHT
+													 			+ DEFAULT_GAP,
+								TABLE_ROW_OFFSET			= THIRD_ITEM_ROW_OFFSET
+													 			+ THIRD_ITEM_ROW_HEIGHT
+													 			+ BIG_GAP;
+	private static final int	FIRST_ITEM_COLUMN_OFFSET	= DEFAULT_GAP,
+								SECOND_ITEM_COLUMN_OFFSET	= FIRST_ITEM_COLUMN_OFFSET
+													 			+ FIRST_ITEM_COLUMN_WIDTH
+													 			+ DEFAULT_GAP,
+								THIRD_ITEM_COLUMN_OFFSET	= SECOND_ITEM_COLUMN_OFFSET
+													 			+ SECOND_ITEM_COLUMN_WIDTH
+													 			+ DEFAULT_GAP,
+								FOURTH_ITEM_COLUMN_OFFSET	= THIRD_ITEM_COLUMN_OFFSET
+													 			+ THIRD_ITEM_COLUMN_WIDTH
+													 			+ DEFAULT_GAP;
 	
 	
 	// window constants
 	/**
 	 * the width of the {@link JFrame}, corrected (+6)
 	 */
-	public static final int FRAME_WIDTH = FIRST_ITEM_COLUMN_OFFSET
-																				+ FULL_WIDTH_COLUMN_WIDTH
-																				+ DEFAULT_GAP
-																				+ 6;
+	public static final int		FRAME_WIDTH_STANDARD		= FIRST_ITEM_COLUMN_OFFSET
+																+ TABLE_WIDTH_STANDARD
+																+ DEFAULT_GAP
+																+ 16,
+								FRAME_WIDTH_WIDE			= FIRST_ITEM_COLUMN_OFFSET
+																+ TABLE_WIDTH_WIDE
+																+ DEFAULT_GAP
+																+ 16;
 	/**
-	 * the height of the {@link JFrame}, corrected (+28)
+	 * the default height of the {@link JFrame}, corrected (+28)
 	 */
-	public static final int DEFAULT_FRAME_HEIGHT = TABLE_ROW_OFFSET
-																								 + DEFAULT_TABLE_ROW_HEIGHT
-																								 + DEFAULT_GAP
-																								 + 28;
+	public static final int		DEFAULT_FRAME_HEIGHT		= TABLE_ROW_OFFSET
+																+ DEFAULT_TABLE_ROW_HEIGHT
+																+ DEFAULT_GAP
+																+ 28;
+	/**
+	 * calculates the frame width from the actual current table display setting
+	 * @return the current frame width
+	 */
+	public int FRAME_WIDTH() {
+		return config.wideTable ? FRAME_WIDTH_WIDE : FRAME_WIDTH_STANDARD;
+	}
 	/**
 	 * calculates the frame height from the actual current table row count
 	 * @return the current frame height
@@ -121,7 +136,7 @@ public class SimeTimer extends JFrame {
 			return TABLE_ROW_OFFSET
 					 + TABLE_ROW_HEIGHT()
 					 + DEFAULT_GAP
-					 + 28;
+					 + 38;
 		}
 	}
 	/**
@@ -191,7 +206,7 @@ public class SimeTimer extends JFrame {
 				Toolkit.getDefaultToolkit().getImage(
 						getClass().getClassLoader().getResource("simetimer/simetimer.png")));
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setSize(FRAME_WIDTH, FRAME_HEIGHT());
+		setSize(FRAME_WIDTH(), FRAME_HEIGHT());
 		setResizable(false);
 		Container cp = getContentPane();
 		cp.setLayout(null);
@@ -271,7 +286,7 @@ public class SimeTimer extends JFrame {
 		// set ScrollPane properties
 		tableScrollPane.setBounds(FIRST_ITEM_COLUMN_OFFSET,
 															TABLE_ROW_OFFSET,
-															FULL_WIDTH_COLUMN_WIDTH,
+															TABLE_WIDTH_STANDARD,
 															TABLE_ROW_HEIGHT());
 		tableScrollPane.setAutoscrolls(true);
 		tableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -635,7 +650,7 @@ public class SimeTimer extends JFrame {
 	
 	/**
 	 * tries to save data to last used save file if autosave is enabled.
-	 * When that fails or autosave is disabled, sets the changesMade flag.
+	 * If that fails or autosave is disabled, sets the unsavedData flag.
 	 */
 	private void changeMade() {
 		if (config.autosave) {
@@ -650,8 +665,8 @@ public class SimeTimer extends JFrame {
 	 * updates the window and table size to match the current configuration
 	 */
 	void tableSizeChanged() {
-		this.setSize(FRAME_WIDTH, FRAME_HEIGHT());
-		tableScrollPane.setSize(FULL_WIDTH_COLUMN_WIDTH, TABLE_ROW_HEIGHT());
+		this.setSize(FRAME_WIDTH(), FRAME_HEIGHT());
+		tableScrollPane.setSize(TABLE_WIDTH(), TABLE_ROW_HEIGHT());
 	}
 	
 	/**
