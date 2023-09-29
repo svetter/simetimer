@@ -15,3 +15,6 @@ bin/
 
 # SimeTimer preferences file
 *.cfg
+
+# SimeTimer project files
+*.stp
