@@ -78,20 +78,24 @@ public class OptionFrame extends JFrame {
 		
 		// setting layout
 		
-		String[] checkBoxStrings = {"load last save on startup",
-									"autosave all changes",
-									"show comment prompt when pressing stop",
-									"show comment prompt when pressing cut",
-									"show save prompt when loading a project",
-									"show save prompt when closing the window",
-									"show wide table (requires restart)"};
-		boolean[] checkBoxStatus = {config.loadLastSaveOnStartup,
-									config.autosave,
-									config.askForCommentOnStop,
-									config.askForCommentOnCut,
-									config.askForSaveOnLoad,
-									config.askForSaveOnClose,
-									config.wideTable};
+		String[] checkBoxStrings = {
+				"load last save on startup",
+				"autosave all changes",
+				"show comment prompt when pressing stop",
+				"show comment prompt when pressing cut",
+				"show save prompt when loading a project",
+				"show save prompt when closing the window",
+				"show wide table"
+		};
+		boolean[] checkBoxStatus = {
+				config.loadLastSaveOnStartup,
+				config.autosave,
+				config.askForCommentOnStop,
+				config.askForCommentOnCut,
+				config.askForSaveOnLoad,
+				config.askForSaveOnClose,
+				config.wideTable
+		};
 		for (int i=0; i<CHECKBOX_COUNT; i++) {
 			checkboxes[i] = new JCheckBox();
 			checkboxes[i].setBounds(

@@ -38,19 +38,17 @@ public class SaveManager {
 	/**
 	 * default path for the preferences file
 	 */
-	public static final String CONFIG_PATH = "SimeTimer.cfg";
+	public static final String PREF_FILE_PATH = "SimeTimer.cfg";
 	
 	// unified error messages
-	private static final String SAVE_ERROR = "Save error";
-	private static final String LOAD_ERROR = "Load error";
-	private static final String SAVING_FAILED = "Saving to file failed:\n";
-	private static final String LOADING_FAILED = "Loading from file failed:\n";
-	private static final String CONFIG_SAVING_FAILED = "Configuration saving failed: ";
-	private static final String CONFIG_LOADING_FAILED = "Configuration loading failed: ";
-	private static final String CLOSING_FAILED = "File could not be closed.";
-	private static final String REASON_FILE_NOT_FOUND = "The file could not be found.";
-	private static final String REASON_FILE_CORRUPTED = "The file could not be read.";
-	private static final String REASON_UNKNOWN = "An unknown error occurred.";
+	private static final String SAVE_ERROR				= "Save error";
+	private static final String LOAD_ERROR				= "Load error";
+	private static final String SAVING_FAILED			= "Saving to file failed:\n";
+	private static final String LOADING_FAILED			= "Loading from file failed:\n";
+	private static final String CLOSING_FAILED			= "File could not be closed.";
+	private static final String REASON_FILE_NOT_FOUND	= "The file could not be found.";
+	private static final String REASON_FILE_CORRUPTED	= "The file could not be read.";
+	private static final String REASON_UNKNOWN			= "An unknown error occurred.";
 	
 	
 	
@@ -270,7 +268,7 @@ public class SaveManager {
 	 */
 	static void saveConfig(boolean[] boolOptions, int tableSize, int fileFormat, int xPosition, int yPosition, File usedFile) {
 		try {
-			DataOutputStream output = new DataOutputStream(new FileOutputStream(CONFIG_PATH));
+			DataOutputStream output = new DataOutputStream(new FileOutputStream(PREF_FILE_PATH));
 			// write data
 			// options:
 			for (boolean boolOption : boolOptions) {
@@ -286,12 +284,9 @@ public class SaveManager {
 				output.writeUTF(usedFile.getAbsolutePath());
 			}
 			output.close();
-		} catch (FileNotFoundException e) {
-			// preferences file couldn't be found
-			System.err.println(CONFIG_SAVING_FAILED + REASON_FILE_NOT_FOUND);
 		} catch (IOException | NullPointerException e) {
 			// unknown error
-			System.err.println(CONFIG_SAVING_FAILED + REASON_UNKNOWN);
+			System.err.println("Configuration saving failed: " + REASON_UNKNOWN);
 		}
 	}
 	
@@ -317,7 +312,7 @@ public class SaveManager {
 		// begin IO work
 		DataInputStream input = null;
 		try {
-			input = new DataInputStream(new FileInputStream(CONFIG_PATH));
+			input = new DataInputStream(new FileInputStream(PREF_FILE_PATH));
 			// read data
 			// options:
 			for (int i=0; i<boolOptions.length; i++) {
@@ -333,11 +328,11 @@ public class SaveManager {
 			}
 		} catch (FileNotFoundException e) {
 			// preferences file couldn't be found
-			System.err.println(CONFIG_LOADING_FAILED + REASON_FILE_NOT_FOUND);
+			System.out.println("Preferences file not found, using defaults.");
 			noProblems = false;
 		} catch (IOException e) {
 			// unknown error
-			System.err.println(CONFIG_LOADING_FAILED + REASON_UNKNOWN);
+			System.err.println("Loading preferences file failed for unknown reason.");
 			noProblems = false;
 		} finally {
 			// try to close file

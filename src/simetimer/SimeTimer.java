@@ -11,6 +11,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.Serial;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -187,9 +188,8 @@ public class SimeTimer extends JFrame {
 		// initializing frame
 
 		// set window icon
-		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(
-						getClass().getClassLoader().getResource("icons/logo.png")));
+		URL iconURL = getClass().getClassLoader().getResource("icons/logo.png");
+		setIconImage(Toolkit.getDefaultToolkit().getImage(iconURL));
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setSize(FRAME_WIDTH(), FRAME_HEIGHT());
 		setResizable(false);
