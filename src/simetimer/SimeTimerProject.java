@@ -3,31 +3,31 @@ package simetimer;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 /**
  * Models a project in the {@link SimeTimer} application.
  * Main features are designed around an {@link ArrayList}
  * which holds the project's main data, the {@link TimeChunk}s.
  * 
  * @author Simon Vetter
- *
  */
 public class SimeTimerProject {
 	
 	/**
 	 * stores all the project's {@link TimeChunk}s 
 	 */
-	private List<TimeChunk> timeChunks;
+	private final List<TimeChunk> timeChunks;
 	
 	/**
 	 * constructor. Initializes the {@link ArrayList}
 	 */
 	public SimeTimerProject() {
-		timeChunks = new ArrayList<TimeChunk>(10);
+		timeChunks = new ArrayList<>(10);
 	}
 	
 	/**
-	 * returns the {@link TimeChunk} stored at the given index
-	 * in the {@link ArrayList}.
+	 * returns the {@link TimeChunk} stored at the given index in the {@link ArrayList}.
 	 * @param index the index of the desired {@link TimeChunk}
 	 * @return the {@link TimeChunk} stored at the given index
 	 */
@@ -44,8 +44,7 @@ public class SimeTimerProject {
 	}
 	
 	/**
-	 * returns the number of {@link TimeChunk}s
-	 * stored in the {@link ArrayList}
+	 * returns the number of {@link TimeChunk}s stored in the {@link ArrayList}
 	 * @return the project's number of {@link TimeChunk}s
 	 */
 	public int size() {
@@ -53,8 +52,7 @@ public class SimeTimerProject {
 	}
 	
 	/**
-	 * returns the total time of all the project's
-	 * {@link TimeChunk}s added together
+	 * returns the total time of all the project's {@link TimeChunk}s added together
 	 * @return the project's total time in milliseconds
 	 */
 	public long getProjectTime() {
@@ -79,9 +77,8 @@ public class SimeTimerProject {
 	}
 	
 	/**
-	 * returns a {@link String} array with length 3
-	 * consisting of the given row index + 1 and date and time
-	 * of the TimeChunk represented as readable Strings.
+	 * returns a {@link String} array with length 3 consisting of the given
+	 * row index + 1 and date and time of the TimeChunk represented as readable Strings.
 	 * @param chunkIndex the index of the desired List entry
 	 * @return a {@link String} array with length 3
 	 */
@@ -94,10 +91,10 @@ public class SimeTimerProject {
 	
 	/**
 	 * sorts the project's {@link TimeChunk}s in ascending order
-	 * by startDate firstly and stoppedTime secondly
+	 * by startDate first and stoppedTime second
 	 */
 	public void sortTimes() {
-		timeChunks.sort((t1, t2) -> t1.compareTo(t2));
+		timeChunks.sort(TimeChunk::compareTo);
 	}
 	
 }

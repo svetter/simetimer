@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
+
 /**
  * Represents the segment of time between the press of the {@link SimeTimer}'s
  * start button and the press of its stop button.
@@ -13,7 +14,6 @@ import java.util.Date;
  * of the measurement, plus an optional comment.
  * 
  * @author Simon Vetter
- *
  */
 public class TimeChunk {
 	
@@ -22,8 +22,8 @@ public class TimeChunk {
 	 */
 	public static final DateFormat DATE_FORMAT = new SimpleDateFormat("d. M. yyyy, HH:mm:ss");
 	
-	private Date startDate;
-	private long stoppedTime;
+	private final Date startDate;
+	private final long stoppedTime;
 	private String comment;
 	
 	
@@ -41,37 +41,12 @@ public class TimeChunk {
 	}
 	/**
 	 * creates new TimeChunk from given arguments
-	 * @param startDate a {@link Date} instance from the start of the measurement
-	 * @param stoppedTime the total length of the TimeChunk, in milliseconds
-	 */
-	public TimeChunk(Date startDate, long stoppedTime) {
-		this(startDate, stoppedTime, "");
-	}
-	/**
-	 * creates new TimeChunk from given arguments
 	 * @param startDateMillis the start date represented in milliseconds
 	 * @param stoppedTime the total length of the TimeChunk, in milliseconds
 	 * @param comment the comment to be associated with the TimeChunk
 	 */
 	public TimeChunk(long startDateMillis, long stoppedTime, String comment) {
 		this(new Date(startDateMillis), stoppedTime, comment);
-	}
-	/**
-	 * creates new TimeChunk from given arguments
-	 * @param startDateMillis the start date represented in milliseconds
-	 * @param stoppedTime the total length of the TimeChunk, in milliseconds
-	 */
-	public TimeChunk(long startDateMillis, long stoppedTime) {
-		this(new Date(startDateMillis), stoppedTime);
-	}
-	/**
-	 * creates a TimeChunk that runs from the given start date
-	 * unto the moment this constructor is called
-	 * @param startTimeMillis the start time of the measuremtent
-	 * 				represented in milliseconds
-	 */
-	public TimeChunk(long startTimeMillis) {
-		this(startTimeMillis, System.currentTimeMillis() - startTimeMillis);
 	}
 	
 	
@@ -95,13 +70,6 @@ public class TimeChunk {
 	 */
 	public String getComment() {
 		return comment;
-	}
-	/**
-	 * get the {@link Date} instance from the end of the measurement
-	 * @return the {@link Date} instance from the end of the measurement
-	 */
-	public Date getEndDate() {
-		return new Date(startDate.getTime() + stoppedTime);
 	}
 	
 	/**
@@ -161,16 +129,11 @@ public class TimeChunk {
 		time -= minutes;
 		time /= 60;
 		int hours = (int) time;
-		StringBuilder result = new StringBuilder();
-		result.append(hours)
-					.append(":")
-					.append(Integer.toString(minutes).length() == 2 ? minutes : "0" + minutes)
-					.append(":")
-					.append(Integer.toString(seconds).length() == 2 ? seconds : "0" + seconds)
-					.append(".")
-					.append(Integer.toString(millis).length() == 3 ? millis :
-									Integer.toString(millis).length() == 2 ? "0" + millis : "00" + millis);
-		return result.toString();
+		return hours +
+				":" + (Integer.toString(minutes).length() == 2 ? minutes : "0" + minutes) +
+				":" + (Integer.toString(seconds).length() == 2 ? seconds : "0" + seconds) +
+				"." + (Integer.toString(millis).length() == 3 ? millis :
+						Integer.toString(millis).length() == 2 ? "0" + millis : "00" + millis);
 	}
 	
 }

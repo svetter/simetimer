@@ -1,26 +1,17 @@
 package simetimer;
 
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.Serial;
+import java.net.URL;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.WindowConstants;
+
 
 public class OptionFrame extends JFrame {
 	
+	@Serial
 	private static final long serialVersionUID = -4351186530101301374L;
 	
 	// layout constants
@@ -29,47 +20,33 @@ public class OptionFrame extends JFrame {
 	private static final int	CHECKBOX_COUNT				= ConfigManager.DEFAULT_BOOL_OPTIONS.length,
 								CHECKBOX_HEIGHT				= 20,
 								VERTICAL_CHECKBOX_GAP		= 0;
-	private static final int	CHECKBOX_ROW_HEIGHT			= CHECKBOX_HEIGHT * CHECKBOX_COUNT
-																+ VERTICAL_CHECKBOX_GAP * (CHECKBOX_COUNT - 1),
+	private static final int	CHECKBOX_ROW_HEIGHT			= CHECKBOX_HEIGHT * CHECKBOX_COUNT + VERTICAL_CHECKBOX_GAP * (CHECKBOX_COUNT - 1),
 								SECOND_ITEM_ROW_HEIGHT		= 25,
 								THIRD_ITEM_ROW_HEIGHT		= 25,
 								FOURTH_ITEM_ROW_HEIGHT		= 30;
 	public static final int		FIRST_ITEM_COLUMN_WIDTH		= 110,
 								FULL_COLUMN_WIDTH			= 270;
 	public static final int		CHECKBOX_ROW_OFFSET			= DEFAULT_GAP,
-								SECOND_ITEM_ROW_OFFSET		= CHECKBOX_ROW_OFFSET
-																+ CHECKBOX_ROW_HEIGHT
-																+ DEFAULT_GAP,
-								THIRD_ITEM_ROW_OFFSET		= SECOND_ITEM_ROW_OFFSET
-																+ SECOND_ITEM_ROW_HEIGHT
-																+ DEFAULT_GAP,
-								FOURTH_ITEM_ROW_OFFSET		= THIRD_ITEM_ROW_OFFSET
-																+ THIRD_ITEM_ROW_HEIGHT
-																+ BIG_GAP;
+								SECOND_ITEM_ROW_OFFSET		= CHECKBOX_ROW_OFFSET + CHECKBOX_ROW_HEIGHT + DEFAULT_GAP,
+								THIRD_ITEM_ROW_OFFSET		= SECOND_ITEM_ROW_OFFSET + SECOND_ITEM_ROW_HEIGHT + DEFAULT_GAP,
+								FOURTH_ITEM_ROW_OFFSET		= THIRD_ITEM_ROW_OFFSET + THIRD_ITEM_ROW_HEIGHT + BIG_GAP;
 	public static final int		FIRST_ITEM_COLUMN_OFFSET	= DEFAULT_GAP,
-								SECOND_ITEM_COLUMN_OFFSET	= FIRST_ITEM_COLUMN_OFFSET
-																+ FIRST_ITEM_COLUMN_WIDTH;
+								SECOND_ITEM_COLUMN_OFFSET	= FIRST_ITEM_COLUMN_OFFSET + FIRST_ITEM_COLUMN_WIDTH;
 	// window constants
-	public static final int		FRAME_WIDTH					= DEFAULT_GAP
-																+ FULL_COLUMN_WIDTH - 10
-																+ DEFAULT_GAP
-																+ 16;
-	public static final int		FRAME_HEIGHT				= FOURTH_ITEM_ROW_OFFSET
-																+ FOURTH_ITEM_ROW_HEIGHT
-																+ DEFAULT_GAP
-																+ 38;
+	public static final int		FRAME_WIDTH					= DEFAULT_GAP + FULL_COLUMN_WIDTH - 10 + DEFAULT_GAP + 16;
+	public static final int		FRAME_HEIGHT				= FOURTH_ITEM_ROW_OFFSET + FOURTH_ITEM_ROW_HEIGHT + DEFAULT_GAP + 38;
 	
 	
 	private final ConfigManager config;
 	
 	// layout elements
-	private JCheckBox[] checkboxes = new JCheckBox[CHECKBOX_COUNT];
-	private JLabel tableSizeLabel = new JLabel();
-	private JSpinner tableSizeSpinner = new JSpinner();
-	private JLabel fileFormatLabel = new JLabel();
-	private JComboBox<String> fileFormatCombobox = new JComboBox<String>();
-	private JButton okButton = new JButton();
-	private JButton cancelButton = new JButton();
+	private final JCheckBox[] checkboxes = new JCheckBox[CHECKBOX_COUNT];
+	private final JLabel tableSizeLabel = new JLabel();
+	private final JSpinner tableSizeSpinner = new JSpinner();
+	private final JLabel fileFormatLabel = new JLabel();
+	private final JComboBox<String> fileFormatCombobox = new JComboBox<>();
+	private final JButton okButton = new JButton();
+	private final JButton cancelButton = new JButton();
 	
 	// logic variables
 	
@@ -85,14 +62,14 @@ public class OptionFrame extends JFrame {
 		this.config = config;
 		
 		// set window icon
-		setIconImage(
-				Toolkit.getDefaultToolkit().getImage(
-						getClass().getClassLoader().getResource("simetimer/options.png")));
+		URL iconURL = getClass().getClassLoader().getResource("simetimer/options.png");
+		setIconImage(Toolkit.getDefaultToolkit().getImage(iconURL));
 		// initializing frame
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
-		setLocation(owner.getLocationOnScreen().x + ((owner.FRAME_WIDTH() - FRAME_WIDTH) / 2),
-								owner.getLocationOnScreen().y + ((owner.FRAME_HEIGHT() - FRAME_HEIGHT) / 2));
+		int xLocation = owner.getLocationOnScreen().x + ((owner.FRAME_WIDTH()  - FRAME_WIDTH ) / 2);
+		int yLocation = owner.getLocationOnScreen().y + ((owner.FRAME_HEIGHT() - FRAME_HEIGHT) / 2);
+		setLocation(xLocation, yLocation);
 		setResizable(false);
 		Container cp = getContentPane();
 		cp.setLayout(null);
@@ -117,10 +94,11 @@ public class OptionFrame extends JFrame {
 									config.wideTable};
 		for (int i=0; i<CHECKBOX_COUNT; i++) {
 			checkboxes[i] = new JCheckBox();
-			checkboxes[i].setBounds(FIRST_ITEM_COLUMN_OFFSET - 4,
-									CHECKBOX_ROW_OFFSET	+ i * (CHECKBOX_HEIGHT + VERTICAL_CHECKBOX_GAP),
-									FULL_COLUMN_WIDTH,
-									CHECKBOX_HEIGHT);
+			checkboxes[i].setBounds(
+					FIRST_ITEM_COLUMN_OFFSET - 4,
+					CHECKBOX_ROW_OFFSET + i * (CHECKBOX_HEIGHT + VERTICAL_CHECKBOX_GAP),
+					FULL_COLUMN_WIDTH,
+					CHECKBOX_HEIGHT);
 			checkboxes[i].setText(checkBoxStrings[i]);
 			checkboxes[i].setFont(new Font("Dialog", Font.PLAIN, 12));
 			checkboxes[i].setSelected(checkBoxStatus[i]);
@@ -128,55 +106,62 @@ public class OptionFrame extends JFrame {
 		}
 		
 		// table size
-		tableSizeLabel.setBounds(FIRST_ITEM_COLUMN_OFFSET,
-									SECOND_ITEM_ROW_OFFSET,
-									FIRST_ITEM_COLUMN_WIDTH,
-									SECOND_ITEM_ROW_HEIGHT);
+		tableSizeLabel.setBounds(
+				FIRST_ITEM_COLUMN_OFFSET,
+				SECOND_ITEM_ROW_OFFSET,
+				FIRST_ITEM_COLUMN_WIDTH,
+				SECOND_ITEM_ROW_HEIGHT);
 		tableSizeLabel.setText("Table size: ");
 		tableSizeLabel.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cp.add(tableSizeLabel);
 		
-		tableSizeSpinner.setBounds(SECOND_ITEM_COLUMN_OFFSET,
-									SECOND_ITEM_ROW_OFFSET,
-									50,
-									SECOND_ITEM_ROW_HEIGHT);
-		tableSizeSpinner.setModel(new SpinnerNumberModel(config.tableSize,
-															ConfigManager.MIN_TABLE_ROW_COUNT,
-															ConfigManager.MAX_TABLE_ROW_COUNT,
-															1));
+		tableSizeSpinner.setBounds(
+				SECOND_ITEM_COLUMN_OFFSET,
+				SECOND_ITEM_ROW_OFFSET,
+				50,
+				SECOND_ITEM_ROW_HEIGHT);
+		tableSizeSpinner.setModel(new SpinnerNumberModel(
+				config.tableSize,
+				ConfigManager.MIN_TABLE_ROW_COUNT,
+				ConfigManager.MAX_TABLE_ROW_COUNT,
+				1));
 		cp.add(tableSizeSpinner);
 		
 		// file format
-		fileFormatLabel.setBounds(FIRST_ITEM_COLUMN_OFFSET,
-									THIRD_ITEM_ROW_OFFSET,
-									FIRST_ITEM_COLUMN_WIDTH,
-									THIRD_ITEM_ROW_HEIGHT);
+		fileFormatLabel.setBounds(
+				FIRST_ITEM_COLUMN_OFFSET,
+				THIRD_ITEM_ROW_OFFSET,
+				FIRST_ITEM_COLUMN_WIDTH,
+				THIRD_ITEM_ROW_HEIGHT);
 		fileFormatLabel.setText("Save file format: ");
 		fileFormatLabel.setFont(new Font("Dialog", Font.PLAIN, 14));
 		cp.add(fileFormatLabel);
 		
-		fileFormatCombobox.setBounds(SECOND_ITEM_COLUMN_OFFSET,
-										THIRD_ITEM_ROW_OFFSET,
-										90,
-										THIRD_ITEM_ROW_HEIGHT);
-		fileFormatCombobox.setModel(new DefaultComboBoxModel<String>(new String[] {"Plain text", "Byte coded"}));
+		fileFormatCombobox.setBounds(
+				SECOND_ITEM_COLUMN_OFFSET,
+				THIRD_ITEM_ROW_OFFSET,
+				90,
+				THIRD_ITEM_ROW_HEIGHT);
+		fileFormatCombobox.setModel(new DefaultComboBoxModel<>(new String[]{"Plain text", "Byte coded"}));
 		fileFormatCombobox.setFont(new Font("Dialog", Font.PLAIN, 12));
 		fileFormatCombobox.setSelectedIndex(config.fileFormat != SaveManager.FILE_FORMAT_BYTE ? 0 : 1);
 		cp.add(fileFormatCombobox);
 		
 		// OK BUTTON
-		okButton.setBounds(FULL_COLUMN_WIDTH - 60,
-							FOURTH_ITEM_ROW_OFFSET,
-							60,
-							FOURTH_ITEM_ROW_HEIGHT);
+		okButton.setBounds(
+				FULL_COLUMN_WIDTH - 60,
+				FOURTH_ITEM_ROW_OFFSET,
+				60,
+				FOURTH_ITEM_ROW_HEIGHT);
 		okButton.setText("OK");
 		okButton.setFont(new Font("Dialog", Font.BOLD, 12));
 		cp.add(okButton);
 		
-		cancelButton.setBounds(okButton.getX() - DEFAULT_GAP - 80,
-								FOURTH_ITEM_ROW_OFFSET,
-								80,
-								FOURTH_ITEM_ROW_HEIGHT);
+		cancelButton.setBounds(
+				okButton.getX() - DEFAULT_GAP - 80,
+				FOURTH_ITEM_ROW_OFFSET,
+				80,
+				FOURTH_ITEM_ROW_HEIGHT);
 		cancelButton.setText("Cancel");
 		cancelButton.setFont(new Font("Dialog", Font.BOLD, 12));
 		cp.add(cancelButton);
@@ -184,29 +169,20 @@ public class OptionFrame extends JFrame {
 		
 		// button functionalities
 		
-		okButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent evt) {
-				boolean[] boolOptions = new boolean[CHECKBOX_COUNT];
-				for (int i=0; i<CHECKBOX_COUNT; i++) {
-					boolOptions[i] = checkboxes[i].isSelected();
-				}
-				config.setOptions(boolOptions,
-									(int) tableSizeSpinner.getModel().getValue(),
-									fileFormatCombobox.getSelectedIndex() != 1
-										? SaveManager.FILE_FORMAT_PLAIN
-										: SaveManager.FILE_FORMAT_BYTE);
-				config.saveConfiguration();
-				dispose();
+		okButton.addActionListener(evt -> {
+			boolean[] boolOptions = new boolean[CHECKBOX_COUNT];
+			for (int i=0; i<CHECKBOX_COUNT; i++) {
+				boolOptions[i] = checkboxes[i].isSelected();
 			}
+			config.setOptions(
+					boolOptions,
+					(int) tableSizeSpinner.getModel().getValue(),
+					fileFormatCombobox.getSelectedIndex() != 1 ? SaveManager.FILE_FORMAT_PLAIN : SaveManager.FILE_FORMAT_BYTE);
+			config.saveConfiguration();
+			dispose();
 		});
 		
-		cancelButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent evt) {
-				dispose();
-			}
-		});
+		cancelButton.addActionListener(evt -> dispose());
 		
 		
 		// on window close with unsaved changes: ask user whether they want to save
@@ -217,12 +193,11 @@ public class OptionFrame extends JFrame {
 			public void windowClosed(WindowEvent evt) {}
 			@Override
 			public void windowClosing(WindowEvent evt) {
-				if (changesMade()
-						&& JOptionPane.showConfirmDialog(evt.getComponent(),
-															"You didn't confirm the changes.\nDo you want to keep them?",
-															"Options not saved",
-															JOptionPane.YES_NO_OPTION,
-															JOptionPane.QUESTION_MESSAGE)
+				if (changesMade() && JOptionPane.showConfirmDialog(evt.getComponent(),
+							"You didn't confirm the changes.\nDo you want to keep them?",
+							"Options not saved",
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE)
 						== JOptionPane.YES_OPTION) {
 					// user wants to save options
 					okButton.doClick();
@@ -255,11 +230,9 @@ public class OptionFrame extends JFrame {
 			boolsChanged |= checkboxes[i].isSelected() != config.boolOptions()[i];
 		}
 		return boolsChanged
-					 || (int) tableSizeSpinner.getModel().getValue() != config.tableSize
-					 || (fileFormatCombobox.getSelectedIndex() == 0
-					 		 && config.fileFormat == SaveManager.FILE_FORMAT_BYTE)
-					 || (fileFormatCombobox.getSelectedIndex() == 1
-					 		 && config.fileFormat == SaveManager.FILE_FORMAT_PLAIN);
+				|| (int) tableSizeSpinner.getModel().getValue() != config.tableSize
+				|| (fileFormatCombobox.getSelectedIndex() == 0 && config.fileFormat == SaveManager.FILE_FORMAT_BYTE)
+				|| (fileFormatCombobox.getSelectedIndex() == 1 && config.fileFormat == SaveManager.FILE_FORMAT_PLAIN);
 	}
 	
 }

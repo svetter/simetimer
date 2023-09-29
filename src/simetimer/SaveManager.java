@@ -1,27 +1,16 @@
 package simetimer;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import javax.swing.*;
+import java.io.*;
 
-import javax.swing.JOptionPane;
 
 
 /**
- * This class manages next to all of the I/O for the {@link SimeTimer}.
+ * This class manages next to all I/O for the {@link SimeTimer}.
  * It saves and loads project files as well as app options and preferences
  * and provides different file formats for the project files.
  * 
  * @author Simon Vetter
- *
  */
 public class SaveManager {
 	
@@ -58,16 +47,16 @@ public class SaveManager {
 	public static final String CONFIG_PATH = "SimeTimer.cfg";
 	
 	// unified error messages
-	private static final String SAVE_ERROR = "Save error",
-															LOAD_ERROR = "Load error",
-															SAVING_FAILED = "Saving to file failed:\n",
-															LOADING_FAILED = "Loading from file failed:\n",
-															CONFIG_SAVING_FAILED = "Configuration saving failed: ",
-															CONFIG_LOADING_FAILED = "Configuration loading failed: ",
-															CLOSING_FAILED = "File could not be closed.",
-															REASON_FILE_NOT_FOUND = "The file could not be found.",
-															REASON_FILE_CORRUPTED = "The file could not be read.",
-															REASON_UNKNOWN = "An unknown error occured.";
+	private static final String SAVE_ERROR = "Save error";
+	private static final String LOAD_ERROR = "Load error";
+	private static final String SAVING_FAILED = "Saving to file failed:\n";
+	private static final String LOADING_FAILED = "Loading from file failed:\n";
+	private static final String CONFIG_SAVING_FAILED = "Configuration saving failed: ";
+	private static final String CONFIG_LOADING_FAILED = "Configuration loading failed: ";
+	private static final String CLOSING_FAILED = "File could not be closed.";
+	private static final String REASON_FILE_NOT_FOUND = "The file could not be found.";
+	private static final String REASON_FILE_CORRUPTED = "The file could not be read.";
+	private static final String REASON_UNKNOWN = "An unknown error occurred.";
 	
 	
 	
@@ -80,17 +69,13 @@ public class SaveManager {
 	 * using the given file format. Delegates the main work to a submethod
 	 * for each file format.
 	 * Handles Exceptions.
-	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
-	 * 				be associated
+	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should be associated
 	 * @param project the {@link SimeTimerProject} to save
 	 * @param saveFile the {@link File} to save the {@link SimeTimerProject} in
 	 * @param fileFormat an int constant to represent the file format to use
 	 * @return true if loading went without Exceptions, else false
 	 */
-	public static boolean saveProject(SimeTimer owner,
-																 		SimeTimerProject project,
-																 		File saveFile,
-																 		int fileFormat) {
+	public static boolean saveProject(SimeTimer owner, SimeTimerProject project, File saveFile, int fileFormat) {
 		try {
 			if (fileFormat == FILE_FORMAT_PLAIN) {
 				saveProjectToPlainFile(project, saveFile);
@@ -104,15 +89,15 @@ public class SaveManager {
 		} catch (FileNotFoundException e) {
 			// save file not found
 			JOptionPane.showMessageDialog(owner,
-																		SAVING_FAILED + REASON_FILE_NOT_FOUND,
-																		SAVE_ERROR,
-																		JOptionPane.ERROR_MESSAGE);
+					SAVING_FAILED + REASON_FILE_NOT_FOUND,
+					SAVE_ERROR,
+					JOptionPane.ERROR_MESSAGE);
 		} catch (IOException e) {
 			// unknown error
 			JOptionPane.showMessageDialog(owner,
-																		SAVING_FAILED + REASON_UNKNOWN,
-																		SAVE_ERROR,
-																		JOptionPane.ERROR_MESSAGE);
+					SAVING_FAILED + REASON_UNKNOWN,
+					SAVE_ERROR,
+					JOptionPane.ERROR_MESSAGE);
 		}
 		return false;
 	}
@@ -122,15 +107,12 @@ public class SaveManager {
 	 * given file format. Delegates the main work to a submethod
 	 * for each file format.
 	 * Handles Exceptions.
-	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
-	 * 				be associated
+	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should be associated
 	 * @param saveFile saveFile the {@link File} to load the {@link SimeTimerProject} from
 	 * @param fileFormat an int constant to represent the file format to use
 	 * @return a new {@link SimeTimerProject} with the data from the file
 	 */
-	public static SimeTimerProject loadProject(SimeTimer owner,
-																						 File saveFile,
-																						 int fileFormat) {
+	public static SimeTimerProject loadProject(SimeTimer owner, File saveFile, int fileFormat) {
 		try {
 			if (fileFormat == FILE_FORMAT_PLAIN) {
 				return loadProjectFromPlainFile(saveFile);
@@ -142,23 +124,23 @@ public class SaveManager {
 		} catch (FileNotFoundException e) {
 			// save file not found
 			JOptionPane.showMessageDialog(owner,
-																		LOADING_FAILED + REASON_FILE_NOT_FOUND,
-																		LOAD_ERROR,
-																		JOptionPane.ERROR_MESSAGE);
+					LOADING_FAILED + REASON_FILE_NOT_FOUND,
+					LOAD_ERROR,
+					JOptionPane.ERROR_MESSAGE);
 			return null;
 		} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
 			// save file corrupted
 			JOptionPane.showMessageDialog(owner,
-																		LOADING_FAILED + REASON_FILE_CORRUPTED,
-																		LOAD_ERROR,
-																		JOptionPane.ERROR_MESSAGE);
+					LOADING_FAILED + REASON_FILE_CORRUPTED,
+					LOAD_ERROR,
+					JOptionPane.ERROR_MESSAGE);
 			return null;
 		} catch (IOException e) {
 			// unknown error
 			JOptionPane.showMessageDialog(owner,
-																		LOADING_FAILED + REASON_UNKNOWN,
-																		LOAD_ERROR,
-																		JOptionPane.ERROR_MESSAGE);
+					LOADING_FAILED + REASON_UNKNOWN,
+					LOAD_ERROR,
+					JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
 	}
@@ -175,20 +157,19 @@ public class SaveManager {
 	 * @param saveFile the {@link File} to save the {@link SimeTimerProject} in
 	 * @throws IOException when unknown IOExceptions occur
 	 */
-	public static void saveProjectToPlainFile(SimeTimerProject project,
-																						File saveFile) throws IOException {
+	public static void saveProjectToPlainFile(SimeTimerProject project, File saveFile) throws IOException {
 		BufferedWriter output;
 		output = new BufferedWriter(new FileWriter(saveFile));
 		output.write("");
 		for (int i=0; i<project.size(); i++) {
-			output.write(Integer.toString(i)
-									 + SEPARATOR
-									 + Long.toString(project.getTimeChunk(i).getStartDate().getTime())
-									 + SEPARATOR
-									 + Long.toString(project.getTimeChunk(i).getStoppedTime())
-									 + SEPARATOR
-									 + project.getTimeChunk(i).getComment()
-									 + System.lineSeparator());
+			output.write(i
+					+ SEPARATOR
+					+ project.getTimeChunk(i).getStartDate().getTime()
+					+ SEPARATOR
+					+ project.getTimeChunk(i).getStoppedTime()
+					+ SEPARATOR
+					+ project.getTimeChunk(i).getComment()
+					+ System.lineSeparator());
 		}
 		output.close();
 	}
@@ -203,20 +184,16 @@ public class SaveManager {
 	 * @throws ArrayIndexOutOfBoundsException when the file ended too soon
 	 * @throws IOException when an unknown error occured
 	 */
-	public static SimeTimerProject loadProjectFromPlainFile(File saveFile) throws FileNotFoundException,
-																																								NumberFormatException,
-																																								ArrayIndexOutOfBoundsException,
-																																								IOException {
+	public static SimeTimerProject loadProjectFromPlainFile(File saveFile)
+			throws FileNotFoundException, NumberFormatException, ArrayIndexOutOfBoundsException, IOException {
 		SimeTimerProject result = new SimeTimerProject();
-		BufferedReader input = null;
+		BufferedReader input;
 		input = new BufferedReader(new FileReader(saveFile));
 		String line = input.readLine();
-		String[] splitted;
+		String[] split;
 		while (line != null && !line.isEmpty()) {
-			splitted = line.split(SEPARATOR, -1);
-			result.addTimeChunk(new TimeChunk(Long.parseLong(splitted[1]),
-					 															Long.parseLong(splitted[2]),
-					 															splitted[3]));
+			split = line.split(SEPARATOR, -1);
+			result.addTimeChunk(new TimeChunk(Long.parseLong(split[1]), Long.parseLong(split[2]), split[3]));
 			line = input.readLine();
 		}
 		// try to close file
@@ -225,7 +202,7 @@ public class SaveManager {
 		} catch (IOException e) {
 			System.err.println(CLOSING_FAILED);
 		}
-		// no Exceptions
+		// no exceptions
 		result.sortTimes();
 		return result;
 	}
@@ -242,9 +219,8 @@ public class SaveManager {
 	 * @throws FileNotFoundException when the save file could not be found
 	 * @throws IOException when an unknown error occured
 	 */
-	public static void saveProjectToByteFile(SimeTimerProject project,
-																					 File saveFile) throws FileNotFoundException,
-																					 											 IOException {
+	public static void saveProjectToByteFile(SimeTimerProject project, File saveFile)
+			throws FileNotFoundException, IOException {
 		DataOutputStream output = new DataOutputStream(new FileOutputStream(saveFile));
 		// for every TimeChunk:
 		for (int i=0; i<project.size(); i++) {
@@ -266,15 +242,12 @@ public class SaveManager {
 	 * @throws FileNotFoundException when the save file could not be found
 	 * @throws IOException when an unknown error occured
 	 */
-	public static SimeTimerProject loadProjectFromByteFile(File saveFile) throws FileNotFoundException,
-																																							 IOException {
+	public static SimeTimerProject loadProjectFromByteFile(File saveFile) throws FileNotFoundException, IOException {
 		SimeTimerProject result = new SimeTimerProject();
-		DataInputStream input = null;
+		DataInputStream input;
 		input = new DataInputStream(new FileInputStream(saveFile));
 		while (input.available() >= 2 * Long.BYTES) {
-			result.addTimeChunk(new TimeChunk(input.readLong(),
-																				input.readLong(),
-																				input.readUTF()));
+			result.addTimeChunk(new TimeChunk(input.readLong(), input.readLong(), input.readUTF()));
 		}
 		// try to close file
 		try {
@@ -282,7 +255,7 @@ public class SaveManager {
 		} catch (IOException e) {
 			System.err.println(CLOSING_FAILED);
 		}
-		// no Exceptions
+		// no exceptions
 		result.sortTimes();
 		return result;
 	}
@@ -301,18 +274,13 @@ public class SaveManager {
 	 * @param yPosition yPosition
 	 * @param usedFile usedFile
 	 */
-	static void saveConfig(boolean[] boolOptions,
-												 int tableSize,
-												 int fileFormat,
-												 int xPosition,
-												 int yPosition,
-												 File usedFile) {
+	static void saveConfig(boolean[] boolOptions, int tableSize, int fileFormat, int xPosition, int yPosition, File usedFile) {
 		try {
 			DataOutputStream output = new DataOutputStream(new FileOutputStream(CONFIG_PATH));
 			// write data
 			// options:
-			for (int i=0; i<boolOptions.length; i++) {
-				output.writeBoolean(boolOptions[i]);
+			for (boolean boolOption : boolOptions) {
+				output.writeBoolean(boolOption);
 			}
 			output.writeInt(tableSize);
 			output.writeInt(fileFormat);
@@ -349,7 +317,7 @@ public class SaveManager {
 		int fileFormat = ConfigManager.DEFAULT_FILE_FORMAT;
 		int xPosition = ConfigManager.DEFAULT_X_POSITION;
 		int yPosition = ConfigManager.DEFAULT_Y_POSITION;
-		String usedPath = ConfigManager.DEFAULT_PATH;
+		String usedPath = null;
 		// is returned, states if there were loading problems
 		boolean noProblems = true;
 		// begin IO work
@@ -380,6 +348,7 @@ public class SaveManager {
 		} finally {
 			// try to close file
 			try {
+				assert input != null;
 				input.close();
 			} catch (IOException e) {
 				System.err.println(CLOSING_FAILED);
@@ -388,87 +357,9 @@ public class SaveManager {
 			}
 		}
 		// feed back options and preferences
-		callback.setOptions(boolOptions,
-												tableSize,
-												fileFormat);
-		callback.setPreferences(xPosition,
-														yPosition,
-														usedPath);
+		callback.setOptions(boolOptions, tableSize, fileFormat);
+		callback.setPreferences(xPosition, yPosition, usedPath);
 		return noProblems;
-	}
-	
-	
-	
-	// SAVE/LOAD SINGLE TIMES
-	
-	/**
-	 * saves the given String into the given File.
-	 * Handles Exceptions.
-	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
-	 * 				be associated
-	 * @param data the String to save into the given File
-	 * @param saveFile the File to save the given String into
-	 */
-	public static void saveToPlainFile(SimeTimer owner,
-																		 String data,
-																		 File saveFile) {
-		BufferedWriter output;
-		try {
-			output = new BufferedWriter(new FileWriter(saveFile));
-			output.write(data);
-			output.close();
-		} catch (IOException e) {
-			// unknown error
-			JOptionPane.showMessageDialog(owner,
-																		SAVING_FAILED + REASON_UNKNOWN,
-																		SAVE_ERROR,
-																		JOptionPane.ERROR_MESSAGE);
-		}
-	}
-	
-	/**
-	 * loads the first line from the given File, parses it to a long
-	 * and returns it.
-	 * Handles Exceptions.
-	 * @param owner the {@link SimeTimer} to which {@link JOptionPane}s should
-	 * 				be associated
-	 * @param saveFile the File to load from
-	 * @return a long parsed from the File's first line or -1L on errors
-	 */
-	public static long loadFromPlainFile(SimeTimer owner,
-																			 File saveFile) {
-		BufferedReader input = null;
-		long data;
-		try {
-			input = new BufferedReader(new FileReader(saveFile));
-			data = Long.parseLong(input.readLine());
-		} catch (FileNotFoundException e) {
-			// save file not found
-			JOptionPane.showMessageDialog(owner,
-																		LOADING_FAILED + REASON_FILE_NOT_FOUND,
-																		LOAD_ERROR,
-																		JOptionPane.ERROR_MESSAGE);
-			return -1L;
-		} catch (NumberFormatException | IOException e) {
-			// save file corrupted
-			JOptionPane.showConfirmDialog(owner,
-																		LOADING_FAILED + REASON_FILE_CORRUPTED,
-																		LOAD_ERROR,
-																		JOptionPane.YES_NO_CANCEL_OPTION,
-																		JOptionPane.ERROR_MESSAGE);
-			return -1L;
-		} finally {
-			// try to close file
-			try {
-				input.close();
-			} catch (IOException e) {
-				System.err.println(CLOSING_FAILED);
-			} catch (NullPointerException e) {
-				// wasn't opened at all
-			}
-		}
-		// no Exceptions
-		return data;
 	}
 
 }
