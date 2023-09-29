@@ -289,7 +289,7 @@ public class ConfigManager {
 			xPosition = ConfigManager.DEFAULT_X_POSITION;
 			yPosition = ConfigManager.DEFAULT_Y_POSITION;
 		}
-		File usedFile = (usedPath != null && !usedPath.equals(SaveManager.NULL_PATH)) ? new File(usedPath) : null;
+		File usedFile = usedPath != null ? new File(usedPath) : null;
 		// position owner window
 		owner.setLocation(xPosition, yPosition);
 		// store usedFile

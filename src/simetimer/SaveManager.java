@@ -34,12 +34,6 @@ public class SaveManager {
 	 * Used to separate startDate and stoppedTime in the PLAIN file format
 	 */
 	public static final String SEPARATOR = "\t";
-	/**
-	 * Used to represent a nonexistent usedFile path in the method
-	 * {@link #saveConfig(boolean[], int, int, int, int, File)}.
-	 * An empty file will be translated into this {@link String}.
-	 */
-	public static final String NULL_PATH = "*null*";
 	
 	/**
 	 * default path for the preferences file
