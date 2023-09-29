@@ -62,7 +62,7 @@ public class OptionFrame extends JFrame {
 		this.config = config;
 		
 		// set window icon
-		URL iconURL = getClass().getClassLoader().getResource("simetimer/options.png");
+		URL iconURL = getClass().getClassLoader().getResource("icons/options.png");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(iconURL));
 		// initializing frame
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
