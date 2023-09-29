@@ -39,7 +39,7 @@ public class ConfigManager {
 	 * default option for whether the app automatically saves all changes
 	 * to the last used {@link File} immediately
 	 */
-	public static final boolean DEFAULT_AUTOSAVE = false; 
+	public static final boolean DEFAULT_AUTOSAVE = true; 
 	/**
 	 * default option for whether the app shows a dialog which
 	 * asks the user to type in a comment for the last
