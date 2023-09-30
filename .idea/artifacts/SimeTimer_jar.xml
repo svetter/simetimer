@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SimeTimer:jar">
+    <output-path>$PROJECT_DIR$</output-path>
+    <root id="archive" name="SimeTimer.jar">
+      <element id="module-output" name="SimeTimer" />
+    </root>
+  </artifact>
+</component>
