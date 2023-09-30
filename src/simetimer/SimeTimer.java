@@ -19,7 +19,7 @@ import java.util.TimerTask;
 
 /**
  * The {@link SimeTimer} is a slick but powerful stopwatch designed
- * to keep track of the time one puts into one ore many different projects.
+ * to keep track of the time one puts into one or many different projects.
  * As well as using it like a traditional stopwatch
  * (including a lap function), you can accumulate sessions, of which the
  * {@link SimeTimer} will store start date and time as well as the
@@ -527,7 +527,7 @@ public class SimeTimer extends JFrame {
 		table.setDragEnabled(false);
 		table.getTableHeader().setReorderingAllowed(true);
 		
-		// set table colums
+		// set table columns
 		tableModel.addColumn("#");
 		tableModel.addColumn("Start date");
 		tableModel.addColumn("Time");

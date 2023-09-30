@@ -174,7 +174,7 @@ public class SaveManager {
 	 * @throws FileNotFoundException when save file couldn't be found
 	 * @throws NumberFormatException when numbers could not be parsed
 	 * @throws ArrayIndexOutOfBoundsException when the file ended too soon
-	 * @throws IOException when an unknown error occured
+	 * @throws IOException when an unknown error occurred
 	 */
 	public static SimeTimerProject loadProjectFromPlainFile(File saveFile)
 			throws FileNotFoundException, NumberFormatException, ArrayIndexOutOfBoundsException, IOException {
@@ -209,7 +209,7 @@ public class SaveManager {
 	 * @param project the {@link SimeTimerProject} to save
 	 * @param saveFile the {@link File} to save the {@link SimeTimerProject} in
 	 * @throws FileNotFoundException when the save file could not be found
-	 * @throws IOException when an unknown error occured
+	 * @throws IOException when an unknown error occurred
 	 */
 	public static void saveProjectToByteFile(SimeTimerProject project, File saveFile)
 			throws FileNotFoundException, IOException {
@@ -232,7 +232,7 @@ public class SaveManager {
 	 * @param saveFile the {@link File} to load the {@link SimeTimerProject} from
 	 * @return a new {@link SimeTimerProject} with the data from the file
 	 * @throws FileNotFoundException when the save file could not be found
-	 * @throws IOException when an unknown error occured
+	 * @throws IOException when an unknown error occurred
 	 */
 	public static SimeTimerProject loadProjectFromByteFile(File saveFile) throws FileNotFoundException, IOException {
 		SimeTimerProject result = new SimeTimerProject();

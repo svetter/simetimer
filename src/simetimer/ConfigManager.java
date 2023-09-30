@@ -181,7 +181,7 @@ public class ConfigManager {
 	int fileFormat;
 	// preferences
 	/**
-	 * the [@link File} that the user lastly used to save or load a project.
+	 * the {@link File} that the user lastly used to save or load a project.
 	 * Canceled save or load operations do not count, but unsuccessful ones do.
 	 */
 	File usedFile;

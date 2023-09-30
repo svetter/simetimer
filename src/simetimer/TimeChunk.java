@@ -87,7 +87,7 @@ public class TimeChunk {
 	 * compares two TimeChunks by their start time firstly and
 	 * their length secondly. If both are equal, returns 0.
 	 * @param otherTimeChunk the TimeChunk to compare this one too
-	 * @return -1 if this TimeChunk is earler than the other one,
+	 * @return -1 if this TimeChunk is earlier than the other one,
 	 * 				 1 if it is later than the other one and
 	 * 				 0 if they are equal
 	 */
