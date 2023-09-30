@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.io.Serial;
 import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -28,14 +27,7 @@ import java.util.TimerTask;
  * @author Simon Vetter
  */
 public class SimeTimer extends JFrame {
-	
-	
-	@Serial
-	private static final long serialVersionUID = -6143989045338224554L;
-	
-	
 	// LAYOUT CONSTANTS
-	
 	private static final int	DEFAULT_GAP					= 10,
 								SMALL_GAP					= 5,
 								BIG_GAP						= 15;
@@ -134,11 +126,8 @@ public class SimeTimer extends JFrame {
 	 */
 	public static final int SCREEN_HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height;
 	
-	/**
-	 * supplies the SimeTimer's identity to subclasses which
-	 * cannot access it directly
-	 */
-	private final SimeTimer THIS = this;
+	public static final String WINDOW_TITLE_NO_FILE		= "SimeTimer";
+	public static final String WINDOW_TITLE_FILE_LOADED	= "SimeTimer  –  ";
 	
 	
 	
@@ -178,7 +167,7 @@ public class SimeTimer extends JFrame {
 	 * constructor. Initializes frame and sets layout
 	 */
 	public SimeTimer() {
-		super("SimeTimer");
+		super(WINDOW_TITLE_NO_FILE);
 		
 		project = new SimeTimerProject();
 		config = new ConfigManager(this);
@@ -305,7 +294,7 @@ public class SimeTimer extends JFrame {
 				enableDisplayTimer(false);
 				String comment = "";
 				if (config.askForCommentOnStop) {
-					comment = JOptionPane.showInputDialog(THIS,
+					comment = JOptionPane.showInputDialog(this,
 							"You can enter a comment for the last time chunk here:",
 							"Enter comment",
 							JOptionPane.PLAIN_MESSAGE);
@@ -332,7 +321,7 @@ public class SimeTimer extends JFrame {
 			}
 			String comment = "";
 			if (config.askForCommentOnCut) {
-				comment = JOptionPane.showInputDialog(THIS,
+				comment = JOptionPane.showInputDialog(this,
 						"You can enter a comment for the last time chunk here:",
 						"Enter comment",
 						JOptionPane.PLAIN_MESSAGE);
@@ -354,8 +343,6 @@ public class SimeTimer extends JFrame {
 		
 		// SAVE
 		SaveLoadAction saveButtonAction = new SaveLoadAction(this) {
-			@Serial
-			private static final long serialVersionUID = 7117119994405070822L;
 			@Override
 			void call(JFileChooser fileChooser, JFrame owner) {
 				// call fileChooser and store feedback
@@ -366,7 +353,8 @@ public class SimeTimer extends JFrame {
 					if (!config.usedFile.getName().contains(".")) {
 						config.usedFile = new File(config.usedFile.getPath().concat(".stp"));
 					}
-					SaveManager.saveProject(THIS, project, config.usedFile, config.fileFormat);
+					SaveManager.saveProject(SimeTimer.this, project, config.usedFile, config.fileFormat);
+					owner.setTitle(WINDOW_TITLE_FILE_LOADED + config.usedFile.getName());
 					unsavedData = false;
 				}
 			}
@@ -375,8 +363,6 @@ public class SimeTimer extends JFrame {
 		
 		// LOAD
 		SaveLoadAction loadButtonAction = new SaveLoadAction(this) {
-			@Serial
-			private static final long serialVersionUID = 7117119994405070822L;
 			@Override
 			void call(JFileChooser fileChooser, JFrame owner) {
 				if (unsavedData && config.askForSaveOnLoad) {
@@ -394,10 +380,11 @@ public class SimeTimer extends JFrame {
 				int option = fileChooser.showOpenDialog(owner);
 				if (option == JFileChooser.APPROVE_OPTION) {
 					// user has approved load
-					SimeTimerProject temp = SaveManager.loadProject(THIS, fileChooser.getSelectedFile(), config.fileFormat);
+					SimeTimerProject temp = SaveManager.loadProject(SimeTimer.this, fileChooser.getSelectedFile(), config.fileFormat);
 					if (temp != null) {
 						// loading successful
 						project = temp;
+						owner.setTitle(WINDOW_TITLE_FILE_LOADED + fileChooser.getSelectedFile().getName());
 						unsavedData = false;
 						updateProjectTime();
 						refreshTimeLabels();
@@ -410,7 +397,7 @@ public class SimeTimer extends JFrame {
 		};
 		loadButton.addActionListener(loadButtonAction);
 		
-		optionsButton.addActionListener(evt -> new OptionFrame(THIS, config));
+		optionsButton.addActionListener(evt -> new OptionFrame(this, config));
 		
 		// CLOSE: save preferences and ask for save on close
 		addWindowListener(new WindowListener() {
@@ -456,9 +443,10 @@ public class SimeTimer extends JFrame {
 		
 		if (config.loadLastSaveOnStartup && config.usedFile != null && config.usedFile.isFile()) {
 			// open last used project
-			SimeTimerProject temp = SaveManager.loadProject(THIS, config.usedFile, config.fileFormat);
+			SimeTimerProject temp = SaveManager.loadProject(this, config.usedFile, config.fileFormat);
 			if (temp != null) {
 				project = temp;
+				setTitle(WINDOW_TITLE_FILE_LOADED + config.usedFile.getName());
 				refreshTimeLabels();
 				refreshTable();
 			} else {
@@ -509,8 +497,6 @@ public class SimeTimer extends JFrame {
 	private void initializeTable() {
 		// set tableModel
 		tableModel = new DefaultTableModel() {
-			@Serial
-			private static final long serialVersionUID = 4218091309598726974L;
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return column == 3;
@@ -642,14 +628,12 @@ public class SimeTimer extends JFrame {
 	private void refreshTimeLabels() {
 		String total, chunk;
 		if (running()) {
-			total = timeToString(lastProjectTime +
-													 System.currentTimeMillis() - currentStartTime);
+			total = timeToString(lastProjectTime + System.currentTimeMillis() - currentStartTime);
 			chunk = timeToString(System.currentTimeMillis() - currentStartTime);
 		} else {
 			updateProjectTime();
 			total = timeToString(lastProjectTime);
-			chunk = timeToString(project.getLastChunk() != null ?
-														 project.getLastChunk().getStoppedTime() : 0);
+			chunk = timeToString(project.getLastChunk() != null ? project.getLastChunk().getStoppedTime() : 0);
 		}
 		totalTimeLabel.setText(total);
 		chunkTimeLabel.setText(chunk);
@@ -731,8 +715,6 @@ public class SimeTimer extends JFrame {
 	 * @author Simon Vetter
 	 */
 	private abstract class SaveLoadAction extends AbstractAction {
-		@Serial
-		private static final long serialVersionUID = -5391589383905897304L;
 		private final JFrame owner;
 
 		/**

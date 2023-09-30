@@ -4,16 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.Serial;
 import java.net.URL;
 
 
 
 public class OptionFrame extends JFrame {
-	
-	@Serial
-	private static final long serialVersionUID = -4351186530101301374L;
-	
 	// layout constants
 	private static final int	DEFAULT_GAP					= 10,
 								BIG_GAP						= 20;
